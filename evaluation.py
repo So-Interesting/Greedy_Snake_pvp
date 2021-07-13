@@ -24,9 +24,7 @@ def get_actions(obs, algo, greedy_info, side):
     # dqn
     if algo == 'dqn':
         actions[:] = dqn_snake.choose_action([obs])
-
-    # greedy
-    if algo == 'greedy':
+    elif algo == 'greedy':
         if side == 0:
             ctrl_agent_index = [0]
         else:
@@ -37,7 +35,7 @@ def get_actions(obs, algo, greedy_info, side):
                                   greedy_info['snakes'],
                                   greedy_info['width'],
                                   greedy_info['height'], ctrl_agent_index)[:]
-
+ 
     return actions
 
 
