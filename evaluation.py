@@ -3,6 +3,7 @@ import numpy as np
 from agent.dqn.rl_agent import get_observations
 from agent.greedy.greedy_agent import greedy_snake
 from agent.dqn.rl_agent import agent as dqn_snake
+import agent.search
 from env.chooseenv import make
 from tabulate import tabulate
 import argparse
@@ -42,6 +43,9 @@ def get_actions(obs, algo, greedy_info, side):
 
 def join_actions(obs, algo_list, greedy_info):
     first_action = get_actions(obs[0], algo_list[0], greedy_info, side=0)
+    print("___________________________")
+    print(obs[0][0])
+    print('\n')
     second_action = get_actions(obs[1], algo_list[1], greedy_info, side=1)
     actions = np.zeros(2)
     actions[0] = first_action[:]

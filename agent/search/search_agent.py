@@ -1,13 +1,10 @@
 from random import random
-from agent.dqn.rl_agent import get_observations
 import copy
 
 from numpy.core.fromnumeric import shape
 from numpy.core.numeric import zeros_like
-from env.snakes import Snake
 import math
 import numpy as np
-import pandas as pd
 
 
     
@@ -67,20 +64,14 @@ def get_map(observation_list,turn,i,mp):
     mp2=mp.copy()
     x= observation_list[turn][0][0]
     y = observation_list[turn][0][1]
-    if (dir==-2):
-        x -= 1
-        x += observation_list['broad_height']
-        x %= observation_list['broad_height']
-    elif (dir==2):
-        x+=1
-        x%= observation_list['broad_height']
-    elif (dir==-1):
-        y-=1
-        y+=observation_list['broad_width']
-        y%=observation_list['broad_width']
-    else:
-        y+=1
-        y%=observation_list['broad_width']
+    dx = [-1,1,0,0]
+    dy = [0,0,-1,1]
+    x += dx[dir]
+    y += dy[dir]
+    x += observation_list['broad_height']
+    x %= observation_list['broad_height']
+    y += observation_list['broad_width']
+    y %= observation_list['broad_width']
     Lx = observation_list[turn][-1][0]
     Ly = observation_list[turn][-1][1]
     if (mp[x][y]==1): mp2[x][y]=turn
@@ -92,20 +83,15 @@ def get_observation_list(observation_list, turn, dir, mp, mp_new):
     bean_list=list()
     x= observation_list[turn][0][0]
     y = observation_list[turn][0][1]
-    if (dir==-2):
-        x -= 1
-        x += observation_list['broad_height']
-        x %= observation_list['broad_height']
-    elif (dir==2):
-        x+=1
-        x%= observation_list['broad_height']
-    elif (dir==-1):
-        y-=1
-        y+=observation_list['broad_width']
-        y%=observation_list['broad_width']
-    else:
-        y+=1
-        y%=observation_list['broad_width']
+    dx = [-1,1,0,0]
+    dy = [0,0,-1,1]
+    x += dx[dir]
+    y += dy[dir]
+    x += observation_list['broad_height']
+    x %= observation_list['broad_height']
+    y += observation_list['broad_width']
+    y %= observation_list['broad_width']
+
     Lx = observation_list[turn][-1][0]
     Ly = observation_list[turn][-1][1]
     for i in range(observation_list['broad_height']):
@@ -115,8 +101,8 @@ def get_observation_list(observation_list, turn, dir, mp, mp_new):
     observation_list['last_direction'][turn]=dir
 
 def reborn_list(observation_list,turn,mp):
-    dx=[0,0,1,-1]
-    dy=[1,-1,0,0]
+    dx=[-1,1,0,0]
+    dy=[0,0,-1,1]
 
     x = random.randrange(0, observation_list['board_height'])
     y = random.randrange(0, observation_list['board_width'])
@@ -168,7 +154,7 @@ def it_dfs(d,turn,observation_list,mp):
     d[turn]-=1
     cnt=0
     sum = 0
-    for i in range(-2,3):
+    for i in range(4):
         if (i==0): continue
         if (Check_available(observation_list,turn,i,mp)==False): continue
         cnt += 1
@@ -192,7 +178,7 @@ def it_dfs(d,turn,observation_list,mp):
 #     return dirc, Min/Max F_calc
 
 def Map_All(observation_list):
-    mp=np.zeros(observation_list['board_height'],observation_list['board_width'])
+    mp=np.zeros((observation_list['board_height'],observation_list['board_width']))
     for i in observation_list[1]:
         mp[i[0],i[1]]=1
     t=0
@@ -209,82 +195,39 @@ def Map_All(observation_list):
         else: mp[i[0],i[1]]=2
     return mp
 
-def sample(observation_list, action_space_list_each, is_act_continuous):
-    state_map= Map_All(observation_list)
-    player = []
-    for j in range(len(action_space_list_each)):
-        
-        # each = [0] * action_space_list_each[j]
-        # idx = np.random.randint(action_space_list_each[j])
-        if action_space_list_each[j].__class__.__name__ == "Discrete":
-            each = [0] * action_space_list_each[j].n
-            idx = action_space_list_each[j].sample()
-            each[idx] = 1
-            player.append(each)
-        elif action_space_list_each[j].__class__.__name__ == "MultiDiscreteParticle":
-            each = []
-            nvec = action_space_list_each[j].high
-            sample_indexes = action_space_list_each[j].sample()
-
-            for i in range(len(nvec)):
-                dim = nvec[i] + 1
-                new_action = [0] * dim
-                index = sample_indexes[i]
-                new_action[index] = 1
-                each.extend(new_action)
-            player.append(each)
-    return player
-
+def get_action(observation_list, mp,my_snake):
+    dx = [-1,1,0,0]
+    dy = [0,0,-1,1]
+    if (my_snake==2):
+        ans=-111
+        dir=0
+        for i in range(4):
+            if (Check_available(observation_list,my_snake,i,mp)):
+                mp_new=get_map(observation_list,2,i,mp)
+                tmp = it_dfs([6,6],3,get_observation_list(observation_list,2,i,mp,mp_new),mp_new)
+                if (tmp>ans):
+                    ans=tmp
+                    dir=i
+        return dir
+    else:
+        ans=1111111
+        dir=0
+        for i in range(4):
+            if (Check_available(observation_list,my_snake,i,mp)):
+                mp_new=get_map(observation_list,3,i,mp)
+                tmp = it_dfs([6,6],2,get_observation_list(observation_list,3,i,mp,mp_new),mp_new)
+                if (tmp<ans):
+                    ans=tmp
+                    dir=i
+        return dir
 def my_controller(observation_list, action_space_list, is_act_continuous=False):
     joint_action = []
-    for i in range(len(action_space_list)):
-        player = sample(observation_list[0], action_space_list[i], is_act_continuous)
-        joint_action.append(player)
-    return joint_action
-
-
-def get_surrounding(state, width, height, x, y):
-    surrounding = [state[(y - 1) % height][x],  # up
-                   state[(y + 1) % height][x],  # down
-                   state[y][(x - 1) % width],  # left
-                   state[y][(x + 1) % width]]  # right
-
-    return surrounding
-
-
-def greedy_snake(state_map, beans, snakes, width, height, ctrl_agent_index):
-    beans_position = copy.deepcopy(beans)
-    actions = []
-    for i in ctrl_agent_index:
-        head_x = snakes[i][0][1]
-        head_y = snakes[i][0][0]
-        head_surrounding = get_surrounding(state_map, width, height, head_x, head_y)
-        bean_x, bean_y, index = get_min_bean(head_x, head_y, beans_position)
-        beans_position.pop(index)
-
-        next_distances = []
-        up_distance = math.inf if head_surrounding[0] > 1 else \
-            math.sqrt((head_x - bean_x) ** 2 + ((head_y - 1) % height - bean_y) ** 2)
-        next_distances.append(up_distance)
-        down_distance = math.inf if head_surrounding[1] > 1 else \
-            math.sqrt((head_x - bean_x) ** 2 + ((head_y + 1) % height - bean_y) ** 2)
-        next_distances.append(down_distance)
-        left_distance = math.inf if head_surrounding[2] > 1 else \
-            math.sqrt(((head_x - 1) % width - bean_x) ** 2 + (head_y - bean_y) ** 2)
-        next_distances.append(left_distance)
-        right_distance = math.inf if head_surrounding[3] > 1 else \
-            math.sqrt(((head_x + 1) % width - bean_x) ** 2 + (head_y - bean_y) ** 2)
-        next_distances.append(right_distance)
-        actions.append(next_distances.index(min(next_distances)))
-    return actions
-
-
-def to_joint_action(actions, num_agent):
-    joint_action = []
-    for i in range(num_agent):
-        action = actions[i]
-        one_hot_action = [0] * 4
-        one_hot_action[action] = 1
-        one_hot_action = [one_hot_action]
-        joint_action.append(one_hot_action)
+    mysnake = observation_list[0]['controlled_snake_index']
+    mp=Map_All(observation_list[0])
+    actions = get_action(observation_list[0], mp,mysnake)
+    player = []
+    each = [0] * 4
+    each[actions[0]] = 1
+    player.append(each)
+    joint_action.append(player)
     return joint_action
