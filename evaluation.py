@@ -139,9 +139,9 @@ def F_calc_greedy_hacker(state, bean, snakes, width, height):
     P2 = shape(snakes[0])[0]-shape(snakes[1])[0]
     P3 = get_sum_bean_distance(snakes[1][0][0], snakes[1][0][1], bean, width, height, snakes) - get_sum_bean_distance(snakes[0][0][0],snakes[0][0][1], bean, width, height, snakes)
     A=3
-    B=6
+    B=3
     C=0.5
-    D=0
+    D=1
     return A*P1+B*P2+C*P3+D*P4
 
 def Check_available(states,beans,snakes,width,height,turn,dir):
@@ -415,6 +415,7 @@ def my_controller(observation_list, action_space_list, is_act_continuous=False):
 def get_my_action(state,beans,snakes,width,height,mysnake):
     joint_action=[]
     actions = get_my_action_MINMAX(state, beans, snakes, width, height, mysnake)
+    # print(shape(actions),"shape(actions) SEARCH")
     return actions
 
 def print_state(state, actions, step):
@@ -540,7 +541,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--my_ai", default="my", help="dqn/random/greedy")
     parser.add_argument("--opponent", default="greedy", help="dqn/random/greedy")
-    parser.add_argument("--episode", default=30)
+    parser.add_argument("--episode", default=500)
     args = parser.parse_args()
 
     # [greedy, dqn, random]
