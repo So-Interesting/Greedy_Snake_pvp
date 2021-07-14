@@ -415,6 +415,7 @@ def my_controller(observation_list, action_space_list, is_act_continuous=False):
 def get_my_action(state,beans,snakes,width,height,mysnake):
     joint_action=[]
     actions = get_my_action_MINMAX(state, beans, snakes, width, height, mysnake)
+    print(shape(actions),"shape(actions) SEARCH")
     return actions
 
 def print_state(state, actions, step):

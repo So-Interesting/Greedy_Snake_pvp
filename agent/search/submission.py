@@ -252,15 +252,15 @@ def reborn_state(state,bean,snakes,width,height,turn,dir):
     else:
         return sum/cnt'''
 def diji(state, X, Y, width, height):
-    mp=np.zeros((width,height))
+    mp=np.zeros((height,width))
     for i in range(height):
         for j in range(width):
             mp[i][j]=math.inf
     mp[X][Y]=0
-    vis=np.zeros((width,height))
+    vis=np.zeros((height,width))
     from queue import PriorityQueue as PQ
     pq=PQ()
-    pq.push((0,(X,Y)))
+    pq.put((0,(X,Y)))
     dx = [-1,1,0,0]
     dy = [0,0,-1,1]
     while (not pq.empty()):
@@ -277,7 +277,7 @@ def diji(state, X, Y, width, height):
             if (state[x1][y1]==2 or state[x1][y1]==3): continue
             if (mp[x1][y1]>mp[x][y]+1):
                 mp[x1][y1]=mp[x][y]+1
-                pq.push((mp[x1][y1],(x1,y1)))
+                pq.put((mp[x1][y1],(x1,y1)))
     return mp
 
 
