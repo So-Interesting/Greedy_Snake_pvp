@@ -86,6 +86,32 @@ def diji(state, X, Y, width, height):
                 pq.put((mp[x1][y1],(x1,y1)))
     return mp
 
+def keep_safe(X, Y, turn, state, width, height, snakes):
+    vis=np.zeros((height,width))
+    pq=[]
+    pq.put((X,Y))
+    dx = [-1,1,0,0]
+    dy = [0,0,-1,1]
+    mx = snakes[turn][-1][0]
+    my = snakes[turn][-1][1]
+    cnt = 0
+    while (not pq.empty()):
+        (x,y) =pq.get()
+        if (vis[x][y]==1): continue
+        vis[x][y] = 1
+        cnt += 1
+        for i in range(4):
+            x1=x+dx[i]
+            y1=y+dy[i]
+            x1 += height
+            x1 %= height
+            y1 += width
+            y1 %= width
+            
+            if (state[x1][y1]==2 or state[x1][y1]==3 and (x1 != mx and y1 != my)): continue
+            pq.put((x1,y1))
+    return cnt
+
 def get_min_bean(x, y, beans_position, width, height, snakes, state_map):
     min_distance = math.inf
     min_x = beans_position[0][1]
