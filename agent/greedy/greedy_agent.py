@@ -93,10 +93,10 @@ def get_min_bean(x, y, beans_position, width, height, state_map):
     index = 0
     mp = diji(state_map, y, x, width, height)
     for i, (bean_y, bean_x) in enumerate(beans_position):
-        distance = math.sqrt((x - bean_x) ** 2 + (y - bean_y) ** 2)
+        # distance = math.sqrt((x - bean_x) ** 2 + (y - bean_y) ** 2)
         # snake_id = get_id(y, x, width)
         # beans_id = get_id(bean_y, bean_x, width)
-        distance = mp[x][y]
+        distance = mp[bean_y][bean_x]
         if distance < min_distance:
             min_x = bean_x
             min_y = bean_y
