@@ -113,6 +113,35 @@ def get_surrounding(state, width, height, x, y):
 
     return surrounding
 
+def keep_safe(X, Y, turn, state, width, height, snakes):
+    vis=np.zeros((height,width))
+    from queue import Queue
+    pq = Queue()
+    pq.put((X,Y))
+    dx = [-1,1,0,0]
+    dy = [0,0,-1,1]
+    mx = snakes[turn][-1][0]
+    my = snakes[turn][-1][1]
+    cnt = 0
+    if (state[X][Y]==1): 
+        mx = -1
+        my = -1
+    while (not pq.empty()):
+        (x,y) =pq.get()
+        if (vis[x][y]==1): continue
+        vis[x][y] = 1
+        cnt += 1
+        for i in range(4):
+            x1=x+dx[i]
+            y1=y+dy[i]
+            x1 += height
+            x1 %= height
+            y1 += width
+            y1 %= width
+            
+            if (state[x1][y1]==2 or state[x1][y1]==3 and (x1 != mx or y1 != my)): continue
+            pq.put((x1,y1))
+    return cnt
 
 def greedy_snake(state_map, beans, snakes, width, height, ctrl_agent_index):
     beans_position = copy.deepcopy(beans)
@@ -130,26 +159,26 @@ def greedy_snake(state_map, beans, snakes, width, height, ctrl_agent_index):
         # bean_id = get_id(bean_y, bean_x, width)
         head_y_tmp = (head_y - 1) % height
         head_id_tmp = get_id(head_y_tmp, head_x, width)
-        up_distance = math.inf if head_surrounding[0] > 1 else \
+        up_distance = math.inf if head_surrounding[0] > 1 or keep_safe(head_y_tmp,head_x,ctrl_agent_index[0],state_map,width,height,snakes)<4  else \
             mat[head_y_tmp][head_x]
             # mat[head_id_tmp][bean_id]
             # math.sqrt((head_x - bean_x) ** 2 + ((head_y - 1) % height - bean_y) ** 2)
         next_distances.append(up_distance)
         head_y_tmp = (head_y + 1) % height
         head_id_tmp = get_id(head_y_tmp, head_x, width)
-        down_distance = math.inf if head_surrounding[1] > 1 else \
+        down_distance = math.inf if head_surrounding[1] > 1 or keep_safe(head_y_tmp,head_x,ctrl_agent_index[0],state_map,width,height,snakes)<4 else \
             mat[head_y_tmp][head_x]
             # math.sqrt((head_x - bean_x) ** 2 + ((head_y + 1) % height - bean_y) ** 2)
         next_distances.append(down_distance)
         head_x_tmp = (head_x - 1) % width
         head_id_tmp = get_id(head_y, head_x_tmp, width)
-        left_distance = math.inf if head_surrounding[2] > 1 else \
+        left_distance = math.inf if head_surrounding[2] > 1 or keep_safe(head_y,head_x_tmp,ctrl_agent_index[0],state_map,width,height,snakes)<4 else \
             mat[head_y][head_x_tmp]
             # math.sqrt(((head_x - 1) % width - bean_x) ** 2 + (head_y - bean_y) ** 2)
         next_distances.append(left_distance)
         head_x_tmp = (head_x + 1) % width
         head_id_tmp = get_id(head_y, head_x_tmp, width)
-        right_distance = math.inf if head_surrounding[3] > 1 else \
+        right_distance = math.inf if head_surrounding[3] > 1 or keep_safe(head_y,head_x_tmp,ctrl_agent_index[0],state_map,width,height,snakes)<4 else \
             mat[head_y][head_x_tmp]
             # math.sqrt(((head_x + 1) % width - bean_x) ** 2 + (head_y - bean_y) ** 2)
         next_distances.append(right_distance)
