@@ -276,7 +276,7 @@ def get_map(state, beans, snakes, width, height, turn, dir):
         mp2[x][y]=turn + 2 
     return mp2
 
-def get_my_action_MINMAX(state,beans,snakes,width,height,my_snake):
+def search_snake(state,beans,snakes,width,height,my_snake):
     if (my_snake==0):
         ans=-111111
         dir=0
@@ -342,7 +342,7 @@ def my_controller(observation_list, action_space_list, is_act_continuous=False):
         state[i[0], i[1]] = 2
     for i in snakes[1]:
         state[i[0], i[1]] = 3
-    actions = get_my_action_MINMAX(state, beans, snakes, width, height, mysnake)
+    actions = search_snake(state, beans, snakes, width, height, mysnake)
     player = []
     each = [0] * 4
     each[actions[0]] = 1
