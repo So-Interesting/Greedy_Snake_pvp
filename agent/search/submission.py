@@ -30,8 +30,8 @@ def diji(state, X, Y, width, height):
             y1 += width
             y1 %= width
             if (state[x1][y1]==2 or state[x1][y1]==3): continue
-            if (mp[x1][y1]>mp[x][y]+1):
-                mp[x1][y1]=mp[x][y]+1
+            if (mp[x1][y1]>d+1):
+                mp[x1][y1]=d+1
                 pq.put((mp[x1][y1],(x1,y1)))
     return mp
 
@@ -229,7 +229,6 @@ def it_dfs_min_max(d,turn,state,bean, snakes, width, height,MinMax):
     This_MIN_MAX=1
     if (turn==0): This_MIN_MAX=-100000
     else: This_MIN_MAX = 100000
-    ls = []
     for i in range(4):
         if (Check_available(state, bean, snakes, width, height,turn,i)):
             cnt += 1
