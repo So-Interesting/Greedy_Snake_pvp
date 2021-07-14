@@ -322,7 +322,11 @@ def get_my_action_MINMAX(state,beans,snakes,width,height,my_snake):
         for i in range(4):
             if (Check_available(state,beans,snakes,width,height,my_snake,i)):
                 mp_new=get_map(state,beans, snakes, width, height, my_snake,i)
+<<<<<<< HEAD
                 tmp = it_dfs_min_max([6,7],my_snake^1,mp_new,get_beans(state,beans,snakes,width,height,my_snake,i),snakes,width,height,-100000)
+=======
+                tmp = it_dfs_min_max([1,2],my_snake^1,mp_new,get_beans(state,beans,snakes,width,height,my_snake,i),snakes,width,height,-100000)
+>>>>>>> fab9d5964fca44ac8b9f38ef5283585c02bc4961
                 if (tmp>ans):
                     ans=tmp
                     dir=i
@@ -333,7 +337,11 @@ def get_my_action_MINMAX(state,beans,snakes,width,height,my_snake):
         for i in range(4):
             if (Check_available(state,beans,snakes,width,height,my_snake,i)):
                 mp_new=get_map(state,beans,snakes,width, height,my_snake,i)
+<<<<<<< HEAD
                 tmp = it_dfs_min_max([7,6],my_snake^1,mp_new,get_beans(state,beans,snakes,width,height,my_snake,i),snakes,width,height,100000)
+=======
+                tmp = it_dfs_min_max([2,1],my_snake^1,mp_new,get_beans(state,beans,snakes,width,height,my_snake,i),snakes,width,height,100000)
+>>>>>>> fab9d5964fca44ac8b9f38ef5283585c02bc4961
                 if (tmp<ans):
                     ans=tmp
                     dir=i

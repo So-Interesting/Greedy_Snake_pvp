@@ -1,7 +1,6 @@
 import copy
 import math
 import numpy as np
-
 def get_id(x, y, width):
     return x * width + y
     
@@ -56,7 +55,6 @@ def floyd(height, width, snakes):
                 if (mat[i][k] + mat[k][j] < mat[i][j]):
                     mat[i][j] = mat[i][k] + mat[k][j]
     return mat
-
 def diji(state, X, Y, width, height):
     mp=np.zeros((height,width))
     for i in range(height):
@@ -86,43 +84,18 @@ def diji(state, X, Y, width, height):
                 pq.put((mp[x1][y1],(x1,y1)))
     return mp
 
-def keep_safe(X, Y, turn, state, width, height, snakes):
-    vis=np.zeros((height,width))
-    pq=[]
-    pq.put((X,Y))
-    dx = [-1,1,0,0]
-    dy = [0,0,-1,1]
-    mx = snakes[turn][-1][0]
-    my = snakes[turn][-1][1]
-    cnt = 0
-    while (not pq.empty()):
-        (x,y) =pq.get()
-        if (vis[x][y]==1): continue
-        vis[x][y] = 1
-        cnt += 1
-        for i in range(4):
-            x1=x+dx[i]
-            y1=y+dy[i]
-            x1 += height
-            x1 %= height
-            y1 += width
-            y1 %= width
-            
-            if (state[x1][y1]==2 or state[x1][y1]==3 and (x1 != mx and y1 != my)): continue
-            pq.put((x1,y1))
-    return cnt
-
-def get_min_bean(x, y, beans_position, width, height, snakes, state_map):
+def get_min_bean(x, y, beans_position, width, height, snakes, state):
     min_distance = math.inf
     min_x = beans_position[0][1]
     min_y = beans_position[0][0]
     index = 0
-    mp = diji(state_map, y, x, width, height)
+    mat = diji(state,y,x,width, height)
     for i, (bean_y, bean_x) in enumerate(beans_position):
         # distance = math.sqrt((x - bean_x) ** 2 + (y - bean_y) ** 2)
+        distance = mat[bean_y][bean_x]
         # snake_id = get_id(y, x, width)
         # beans_id = get_id(bean_y, bean_x, width)
-        distance = mp[bean_y][bean_x]
+        # distance = mat[snake_id][beans_id]
         if distance < min_distance:
             min_x = bean_x
             min_y = bean_y
@@ -211,7 +184,6 @@ def greedy_snake(state_map, beans, snakes, width, height, ctrl_agent_index):
         actions.append(next_distances.index(min(next_distances)))
     return actions
 
-
 def to_joint_action(actions, num_agent):
     joint_action = []
     for i in range(num_agent):
@@ -220,4 +192,24 @@ def to_joint_action(actions, num_agent):
         one_hot_action[action] = 1
         one_hot_action = [one_hot_action]
         joint_action.append(one_hot_action)
+    return joint_action
+
+def my_controller(observation_list, action_space_list, is_act_continuous=False):
+    joint_action = []
+    width = observation_list[0]['board_width']
+    height = observation_list[0]['board_height']
+    mysnake = observation_list[0]['controlled_snake_index']
+    state = np.zeros((height, width))
+    beans = observation_list[0][1]
+    snakes = []
+    snakes.append(observation_list[0][2])
+    snakes.append(observation_list[0][3])
+    for i in beans:
+        state[i[0], i[1]] = 1
+    for i in snakes[0]:
+        state[i[0], i[1]] = 2
+    for i in snakes[1]:
+        state[i[0], i[1]] = 3
+    actions = greedy_snake(state, beans, snakes, width, height, [mysnake])
+    joint_action = to_joint_action(actions, 1)
     return joint_action
