@@ -62,12 +62,12 @@ def get_min_bean(x, y, beans_position, width, height, snakes):
     min_x = beans_position[0][1]
     min_y = beans_position[0][0]
     index = 0
-    # mat = floyd(height, width, snakes)
+    mat = floyd(height, width, snakes)
     for i, (bean_y, bean_x) in enumerate(beans_position):
         distance = math.sqrt((x - bean_x) ** 2 + (y - bean_y) ** 2)
-        # snake_id = get_id(y, x, width)
-        # beans_id = get_id(bean_y, bean_x, width)
-        # distance = mat[snake_id][beans_id]
+        snake_id = get_id(y, x, width)
+        beans_id = get_id(bean_y, bean_x, width)
+        distance = mat[snake_id][beans_id]
         if distance < min_distance:
             min_x = bean_x
             min_y = bean_y
@@ -100,27 +100,27 @@ def greedy_snake(state_map, beans, snakes, width, height, ctrl_agent_index):
         bean_id = get_id(bean_y, bean_x, width)
         head_y_tmp = (head_y - 1) % height
         head_id_tmp = get_id(head_y_tmp, head_x, width)
-        up_distance = math.inf if head_surrounding[0] > 1 else \ 
-            math.sqrt((head_x - bean_x) ** 2 + ((head_y - 1) % height - bean_y) ** 2)
-            # mat[head_id_tmp][bean_id] 
+        up_distance = math.inf if head_surrounding[0] > 1 else \
+            mat[head_id_tmp][bean_id]
+            # math.sqrt((head_x - bean_x) ** 2 + ((head_y - 1) % height - bean_y) ** 2)
         next_distances.append(up_distance)
         head_y_tmp = (head_y + 1) % height
         head_id_tmp = get_id(head_y_tmp, head_x, width)
         down_distance = math.inf if head_surrounding[1] > 1 else \
-            # mat[head_id_tmp][bean_id]
-            math.sqrt((head_x - bean_x) ** 2 + ((head_y + 1) % height - bean_y) ** 2)
+            mat[head_id_tmp][bean_id]
+            # math.sqrt((head_x - bean_x) ** 2 + ((head_y + 1) % height - bean_y) ** 2)
         next_distances.append(down_distance)
         head_x_tmp = (head_x - 1) % width
         head_id_tmp = get_id(head_y, head_x_tmp, width)
         left_distance = math.inf if head_surrounding[2] > 1 else \
-            # mat[head_id_tmp][bean_id]
-            math.sqrt(((head_x - 1) % width - bean_x) ** 2 + (head_y - bean_y) ** 2)
+            mat[head_id_tmp][bean_id]
+            # math.sqrt(((head_x - 1) % width - bean_x) ** 2 + (head_y - bean_y) ** 2)
         next_distances.append(left_distance)
         head_x_tmp = (head_x + 1) % width
         head_id_tmp = get_id(head_y, head_x_tmp, width)
         right_distance = math.inf if head_surrounding[3] > 1 else \
-            # mat[head_id_tmp][bean_id]
-            math.sqrt(((head_x + 1) % width - bean_x) ** 2 + (head_y - bean_y) ** 2)
+            mat[head_id_tmp][bean_id]
+            # math.sqrt(((head_x + 1) % width - bean_x) ** 2 + (head_y - bean_y) ** 2)
         next_distances.append(right_distance)
         actions.append(next_distances.index(min(next_distances)))
     return actions
