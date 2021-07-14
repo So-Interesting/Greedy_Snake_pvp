@@ -138,10 +138,10 @@ def F_calc_greedy_hacker(state, bean, snakes, width, height):
     P1 = your_dist - my_dist
     P2 = shape(snakes[0])[0]-shape(snakes[1])[0]
     P3 = get_sum_bean_distance(snakes[1][0][0], snakes[1][0][1], bean, width, height, snakes) - get_sum_bean_distance(snakes[0][0][0],snakes[0][0][1], bean, width, height, snakes)
-    A=1
-    B=0.5
+    A=3
+    B=6
     C=0.5
-    D=5
+    D=0
     return A*P1+B*P2+C*P3+D*P4
 
 def Check_available(states,beans,snakes,width,height,turn,dir):
@@ -261,7 +261,7 @@ def reborn_state(state,bean,snakes,width,height,turn,dir):
         return sum/cnt'''
 
 def it_dfs(d,turn,state,bean, snakes, width, height):
-    if (d[turn]==0): return F_calc_greedy_hacker(state, bean, snakes, width, height)
+    if (d[turn]==0 or shape(bean)[0]<=3): return F_calc_greedy_hacker(state, bean, snakes, width, height)
     d[turn] -= 1
     cnt = 0
     sum = 0
@@ -284,6 +284,29 @@ def it_dfs(d,turn,state,bean, snakes, width, height):
             if (turn==0):
                 return 0.7*ls[0]+0.2*ls[1]+0.1*ls[2]
             else: return 0.1*ls[0]+0.2*ls[1]+0.7*ls[2]
+def it_dfs_min_max(d,turn,state,bean, snakes, width, height,MinMax):
+    if (d[turn]==0 or shape(bean)[0]<=3): return F_calc_greedy_hacker(state, bean, snakes, width, height)
+    d[turn] -= 1
+    cnt = 0
+    This_MIN_MAX=1
+    if (turn==0): This_MIN_MAX=-100000
+    else: This_MIN_MAX = 100000
+    ls = []
+    for i in range(4):
+        if (Check_available(state, bean, snakes, width, height,turn,i)):
+            cnt += 1
+            tmp= it_dfs_min_max(d,turn^1,get_map(state,bean,snakes,width,height,turn,i),get_beans(state,bean,snakes,width,height,turn,i),get_snakes(state,bean,snakes,width,height,turn,i),width,height,This_MIN_MAX)
+            if (turn==0):
+                if (tmp>This_MIN_MAX): This_MIN_MAX=tmp
+                if (This_MIN_MAX>=MinMax): return This_MIN_MAX
+            else:
+                if (tmp<This_MIN_MAX): This_MIN_MAX=tmp
+                if (This_MIN_MAX<=MinMax): return This_MIN_MAX
+    if (cnt==0):
+        snakes = reborn_snake(state,bean,snakes,width,height,turn,i)
+        return it_dfs_min_max(d,turn^1,reborn_state(state,bean,snakes,width,height,turn,i),bean,snakes,width,height,This_MIN_MAX)
+    else:
+        return This_MIN_MAX
 
 # def it_dfs(d, turn, state_map,Min_Max):
 #     if (d[turn]==0): return dirc.default, F_calc
@@ -315,6 +338,29 @@ def get_map(state, beans, snakes, width, height, turn, dir):
         mp2[x][y]=turn
     return mp2
 
+def get_my_action_MINMAX(state,beans,snakes,width,height,my_snake):
+    if (my_snake==0):
+        ans=-111111
+        dir=0
+        for i in range(4):
+            if (Check_available(state,beans,snakes,width,height,my_snake,i)):
+                mp_new=get_map(state,beans, snakes, width, height, my_snake,i)
+                tmp = it_dfs_min_max([12,12],my_snake^1,mp_new,get_beans(state,beans,snakes,width,height,my_snake,i),snakes,width,height,-100000)
+                if (tmp>ans):
+                    ans=tmp
+                    dir=i
+        return [dir]
+    else:
+        ans=1111111
+        dir=0
+        for i in range(4):
+            if (Check_available(state,beans,snakes,width,height,my_snake,i)):
+                mp_new=get_map(state,beans,snakes,width, height,my_snake,i)
+                tmp = it_dfs_min_max([12,12],my_snake^1,mp_new,get_beans(state,beans,snakes,width,height,my_snake,i),snakes,width,height,100000)
+                if (tmp<ans):
+                    ans=tmp
+                    dir=i
+        return [dir]
 
 def get_my_action2(state, beans ,snakes, width, height, my_snake):
     dx = [-1,1,0,0]
@@ -336,52 +382,12 @@ def get_my_action2(state, beans ,snakes, width, height, my_snake):
         for i in range(4):
             if (Check_available(state,beans,snakes,width,height,my_snake,i)):
                 mp_new=get_map(state,beans,snakes,width, height,my_snake,i)
-                tmp = it_dfs([8,8],my_snake^1,)
+                tmp = it_dfs([8,8],my_snake^1,mp_new,get_beans(state,beans,snakes,width,height,my_snake,i),snakes,width,height)
                 if (tmp<ans):
                     ans=tmp
                     dir=i
         return [dir]
-'''
-def get_my_action(observation_list, mp,my_snake):
-    dx = [-1,1,0,0]
-    dy = [0,0,-1,1]
-    if (my_snake==2):
-        ans=-111
-        dir=0
-        for i in range(4):
-            if (Check_available(observation_list,my_snake,i,mp)):
-                mp_new=get_map(observation_list,2,i,mp)
-                tmp = it_dfs([6,6],3,get_observation_list(observation_list,2,i,mp,mp_new),mp_new)
-                if (tmp>ans):
-                    ans=tmp
-                    dir=i
-        return dir
-    else:
-        ans=1111111
-        dir=0
-        for i in range(4):
-            if (Check_available(observation_list,my_snake,i,mp)):
-                mp_new=get_map(observation_list,3,i,mp)
-                tmp = it_dfs([6,6],2,get_observation_list(observation_list,3,i,mp,mp_new),mp_new)
-                if (tmp<ans):
-                    ans=tmp
-                    dir=i
-        return dir
 
-
- 
-def my_controller(observation_list, action_space_list, is_act_continuous=False):
-    joint_action = []
-    mysnake = observation_list[0]['controlled_snake_index']
-    mp=Map_All(observation_list[0])
-    actions = get_my_action(observation_list[0], mp,mysnake)
-    player = []
-    each = [0] * 4
-    each[actions[0]] = 1
-    player.append(each)
-    joint_action.append(player)
-    return joint_action
-'''
 def my_controller(observation_list, action_space_list, is_act_continuous=False):
     joint_action = []
     width = observation_list[0]['board_width']
@@ -408,7 +414,7 @@ def my_controller(observation_list, action_space_list, is_act_continuous=False):
 
 def get_my_action(state,beans,snakes,width,height,mysnake):
     joint_action=[]
-    actions = get_my_action2(state, beans, snakes, width, height, mysnake)
+    actions = get_my_action_MINMAX(state, beans, snakes, width, height, mysnake)
     return actions
 
 def print_state(state, actions, step):
@@ -534,7 +540,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--my_ai", default="my", help="dqn/random/greedy")
     parser.add_argument("--opponent", default="greedy", help="dqn/random/greedy")
-    parser.add_argument("--episode", default=300)
+    parser.add_argument("--episode", default=30)
     args = parser.parse_args()
 
     # [greedy, dqn, random]
