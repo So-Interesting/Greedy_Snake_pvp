@@ -45,76 +45,47 @@ def diji(state, X, Y, width, height):
                 pq.put((mp[x1][y1],(x1,y1)))
     return mp
  
-def get_min_bean_distance(x, y, beans_position, width, height, snakes,state):
-    min_distance = math.inf
+def get_bean_distance_all(x,y,beans_position,width,height, state):
+    Mn_distance= math.inf
+    sum_distance=0
+    distance = 0
     mp = diji(state,x, y, width, height)
-    if (shape(beans_position)[0]==0): return 0
-    min_x = beans_position[0][0]
-    min_y = beans_position[0][1]
     index = 0
     # mat = floyd(height, width, snakes)
     for i, (bean_x, bean_y) in enumerate(beans_position):
         # distance = min(abs(x - bean_x), abs(x + bean_x + 2 - height))  + min(abs (y - bean_y), abs(y + bean_y + 2 - width))
         distance = mp[bean_x][bean_y]
+        sum_distance += distance
         # snake_id = get_id(x, y, width)
         # beans_id = get_id(bean_x, bean_y, width)
         # distance = mat[snake_id][beans_id]
-        if distance < min_distance:
-            min_x = bean_x
-            min_y = bean_y
-            min_distance = distance
+        if distance < Mn_distance:
+            Mn_distance = distance
             index = i
-    return min_distance
-
-def get_sum_bean_distance(x, y, beans_position, width, height, snakes,state):
-    distance = 0
-    mp = diji(state,x,y,width,height)
-    # mat = floyd(height, width, snakes)
-    for i, (bean_x, bean_y) in enumerate(beans_position):
-        # distance += min(abs(x - bean_x), abs(x + bean_x + 2 - height))  + min(abs (y - bean_y), abs(y + bean_y + 2 - width))
-        distance += mp[bean_x][bean_y]
-        # snake_id = get_id(x, y, width)
-        # beans_id = get_id(bean_x, bean_y, width)
-        # tmp = mat[snake_id][beans_id]
-        # if (tmp != math.inf) : distance += tmp
-    return distance
+    return (Mn_distance,index, sum_distance)
 
 def F_calc(state, bean, snakes, width, height):
-    P1 = get_min_bean_distance(snakes[1][0][0],snakes[1][0][1],bean, width, height, snakes, state)-get_min_bean_distance(snakes[0][0][0],snakes[0][0][1],bean,width,height, snakes, state)
-    P2 = shape(snakes[0])[0]-shape(snakes[1])[0]
-    P3 = get_sum_bean_distance(snakes[1][0][0],snakes[1][0][1],bean, width, height, snakes, state)-get_sum_bean_distance(snakes[0][0][0],snakes[0][0][1],bean, width, height, snakes, state)
-    A= 2
-    B =1
-    C = 0.5
-    return A*P1 + B*P2 + C*P3
-def get_min_bean_distance_index(x, y, beans_position, width, height, snakes,state):
-    min_distance = math.inf
-    mp = diji(state,x, y, width, height)
-    if (shape(beans_position)[0]==0): return 0
-    index = 0
-    # mat = floyd(height, width, snakes)
-    for i, (bean_x, bean_y) in enumerate(beans_position):
-        # distance = min(abs(x - bean_x), abs(x + bean_x + 2 - height))  + min(abs (y - bean_y), abs(y + bean_y + 2 - width))
-        distance = mp[bean_x][bean_y]
-        # snake_id = get_id(x, y, width)
-        # beans_id = get_id(bean_x, bean_y, width)
-        # distance = mat[snake_id][beans_id]
-        if distance < min_distance:
-            min_distance = distance
-            index = i
-    return index
-
-
-def F_calc_greedy_hacker(state, bean, snakes, width, height):
-    your_dist= get_min_bean_distance(snakes[1][0][0], snakes[1][0][1], bean, width, height, snakes, state)
-    your_bean = get_min_bean_distance_index(snakes[1][0][0], snakes[1][0][1], bean, width, height, snakes, state)
-    my_dist = get_min_bean_distance(snakes[0][0][0],snakes[0][0][1],bean, width, height, snakes, state)
-    my_bean =  get_min_bean_distance_index(snakes[0][0][0],snakes[0][0][1],bean, width, height, snakes,state)
+    (your_dist,your_bean,your_sum)= get_bean_distance_all(snakes[1][0][0],snakes[1][0][1],bean,width,height,state)
+    (my_dist, my_bean, my_sum) = get_bean_distance_all(snakes[0][0][0],snakes[0][0][1],bean,width,height,state)
     if (my_bean == your_bean and my_dist < your_dist) : P4 = 1
     else : P4 = 0
     P1 = your_dist - my_dist
     P2 = shape(snakes[0])[0]-shape(snakes[1])[0]
-    P3 = get_sum_bean_distance(snakes[1][0][0], snakes[1][0][1], bean, width, height, snakes, state) - get_sum_bean_distance(snakes[0][0][0],snakes[0][0][1], bean, width, height, snakes,state)
+    P3 = your_sum - my_sum
+    A=4
+    B=6
+    C=1
+    D=0
+    return A*P1+B*P2+C*P3+D*P4
+
+def F_calc_greedy_hacker(state, bean, snakes, width, height):
+    (your_dist,your_bean,your_sum)= get_bean_distance_all(snakes[1][0][0],snakes[1][0][1],bean,width,height,state)
+    (my_dist, my_bean, my_sum) = get_bean_distance_all(snakes[0][0][0],snakes[0][0][1],bean,width,height,state)
+    if (my_bean == your_bean and my_dist < your_dist) : P4 = 1
+    else : P4 = 0
+    P1 = your_dist - my_dist
+    P2 = shape(snakes[0])[0]-shape(snakes[1])[0]
+    P3 = your_sum - my_sum
     A=4
     B=6
     C=1
