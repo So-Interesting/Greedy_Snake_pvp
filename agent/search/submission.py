@@ -70,23 +70,6 @@ def F_calc_greedy_hacker(state, bean, snakes, width, height):
     return A*P1+B*P2+C*P3+D*P4
 
 
-def Check_available(observation_list,turn,dir,mp):
-    x = observation_list[turn][0][1]
-    y = observation_list[turn][0][0]
-    dx = [0,0,-1,1]
-    dy = [-1,1,0,0]
-    x+=dx[dir]
-    y+=dy[dir]
-    x += observation_list['broad_weight']
-    x %= observation_list['broad_weight']
-    y+=observation_list['broad_height']
-    y%=observation_list['broad_height']
-    
-    Lx = observation_list[turn][-1][1]
-    Ly = observation_list[turn][-1][0]
-    if (mp[y][x]==0 or mp[y][x]==1 or (x==Lx and y==Ly)): return True
-    else: return False
-
 def get_beans(state,bean,snakes,width,height,turn, dir):
     x = snakes[turn][0][0]
     y = snakes[turn][0][1]
@@ -241,7 +224,7 @@ def get_my_action2(state, beans ,snakes, width, height, my_snake):
         for i in range(4):
             if (Check_available(state,beans,snakes,width,height,my_snake,i)):
                 mp_new=get_map(state,beans, snakes, width, height, my_snake,i)
-                tmp = it_dfs([8,8],my_snake^1,get_map(state,beans,snakes,width,height,my_snake,i),get_beans(state,beans,snakes,width,height,my_snake,i),snakes,width,height)
+                tmp = it_dfs([7,7],my_snake^1,get_map(state,beans,snakes,width,height,my_snake,i),get_beans(state,beans,snakes,width,height,my_snake,i),snakes,width,height)
                 if (tmp>ans):
                     ans=tmp
                     dir=i
@@ -252,7 +235,7 @@ def get_my_action2(state, beans ,snakes, width, height, my_snake):
         for i in range(4):
             if (Check_available(state,beans,snakes,width,height,my_snake,i)):
                 mp_new=get_map(state,beans,snakes,width, height,my_snake,i)
-                tmp = it_dfs([8,8],my_snake^1,)
+                tmp = it_dfs([7,7],my_snake^1,)
                 if (tmp<ans):
                     ans=tmp
                     dir=i
