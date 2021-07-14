@@ -371,7 +371,7 @@ def my_controller(observation_list, action_space_list, is_act_continuous=False):
         state[i[0], i[1]] = 2
     for i in snakes[1]:
         state[i[0], i[1]] = 3
-    actions = get_my_action2(state, beans, snakes, width, height, mysnake)
+    actions = get_my_action_MINMAX(state, beans, snakes, width, height, mysnake)
     player = []
     each = [0] * 4
     each[actions[0]] = 1
