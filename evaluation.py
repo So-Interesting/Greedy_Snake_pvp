@@ -517,7 +517,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--my_ai", default="my", help="dqn/random/greedy")
     parser.add_argument("--opponent", default="greedy", help="dqn/random/greedy")
-    parser.add_argument("--episode", default=30)
+    parser.add_argument("--episode", default=100)
     args = parser.parse_args()
 
     # [greedy, dqn, random]
