@@ -168,6 +168,25 @@ def keep_safe(X, Y, turn, state, width, height, snakes):
             if (state[x1][y1]==2 or state[x1][y1]==3 and (x1 != mx or y1 != my)): continue
             pq.put((x1,y1))
     return cnt
+def get_map(state, beans, snakes, width, height, turn, dir):
+    mp2=state.copy()
+    x= snakes[turn][0][0]
+    y = snakes[turn][0][1]
+    dx = [-1,1,0,0]
+    dy = [0,0,-1,1]
+    x += dx[dir]
+    y += dy[dir]
+    x += height
+    x %= height
+    y += width
+    y %= width
+    Lx = snakes[turn][-1][0]
+    Ly = snakes[turn][-1][1]
+    if (state[x][y]==1): mp2[x][y]=turn + 2
+    elif (not (Lx==x and Ly==y)): 
+        mp2[Lx][Ly]=0
+        mp2[x][y]=turn + 2 
+    return mp2
 
 def Cnt_d(state, beans, snakes, width, height, turn, dir):
     mp=get_map(state,beans,snakes,width,height,turn,dir)
