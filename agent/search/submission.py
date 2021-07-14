@@ -106,9 +106,9 @@ def F_calc_greedy_hacker(state, bean, snakes, width, height):
     P1 = your_dist - my_dist
     P2 = shape(snakes[0])[0]-shape(snakes[1])[0]
     P3 = get_sum_bean_distance(snakes[1][0][0], snakes[1][0][1], bean, width, height, snakes, state) - get_sum_bean_distance(snakes[0][0][0],snakes[0][0][1], bean, width, height, snakes,state)
-    A=4
-    B=6
-    C=1
+    A=5
+    B=60
+    C=0.5
     D=0
     return A*P1+B*P2+C*P3+D*P4
 
@@ -254,7 +254,7 @@ def it_dfs(d,turn,state,bean, snakes, width, height):
             else: return 0.1*ls[0]+0.2*ls[1]+0.7*ls[2]
             
 def it_dfs_min_max(d,turn,state,bean, snakes, width, height,MinMax):
-    if (d[turn]==0 or shape(bean)[0]<=3): return F_calc_greedy_hacker(state, bean, snakes, width, height)
+    if (d[turn]==0): return F_calc_greedy_hacker(state, bean, snakes, width, height)
     d[turn] -= 1
     cnt = 0
     This_MIN_MAX=1
@@ -314,7 +314,7 @@ def get_my_action_MINMAX(state,beans,snakes,width,height,my_snake):
         for i in range(4):
             if (Check_available(state,beans,snakes,width,height,my_snake,i)):
                 mp_new=get_map(state,beans, snakes, width, height, my_snake,i)
-                tmp = it_dfs_min_max([12,12],my_snake^1,mp_new,get_beans(state,beans,snakes,width,height,my_snake,i),snakes,width,height,-100000)
+                tmp = it_dfs_min_max([1,1],my_snake^1,mp_new,get_beans(state,beans,snakes,width,height,my_snake,i),snakes,width,height,-100000)
                 if (tmp>ans):
                     ans=tmp
                     dir=i
@@ -325,7 +325,7 @@ def get_my_action_MINMAX(state,beans,snakes,width,height,my_snake):
         for i in range(4):
             if (Check_available(state,beans,snakes,width,height,my_snake,i)):
                 mp_new=get_map(state,beans,snakes,width, height,my_snake,i)
-                tmp = it_dfs_min_max([12,12],my_snake^1,mp_new,get_beans(state,beans,snakes,width,height,my_snake,i),snakes,width,height,100000)
+                tmp = it_dfs_min_max([1,1],my_snake^1,mp_new,get_beans(state,beans,snakes,width,height,my_snake,i),snakes,width,height,100000)
                 if (tmp<ans):
                     ans=tmp
                     dir=i
