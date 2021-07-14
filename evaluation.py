@@ -309,10 +309,10 @@ def get_map(state, beans, snakes, width, height, turn, dir):
     y %= width
     Lx = snakes[turn][-1][0]
     Ly = snakes[turn][-1][1]
-    if (state[x][y]==1): mp2[x][y]=turn
+    if (state[x][y]==1): mp2[x][y]=turn + 2
     elif (not (Lx==x and Ly==y)): 
         mp2[Lx][Ly]=0
-        mp2[x][y]=turn
+        mp2[x][y]=turn + 2 
     return mp2
 
 def get_my_action_MINMAX(state,beans,snakes,width,height,my_snake):
@@ -322,11 +322,7 @@ def get_my_action_MINMAX(state,beans,snakes,width,height,my_snake):
         for i in range(4):
             if (Check_available(state,beans,snakes,width,height,my_snake,i)):
                 mp_new=get_map(state,beans, snakes, width, height, my_snake,i)
-<<<<<<< HEAD
-                tmp = it_dfs_min_max([6,7],my_snake^1,mp_new,get_beans(state,beans,snakes,width,height,my_snake,i),snakes,width,height,-100000)
-=======
                 tmp = it_dfs_min_max([1,2],my_snake^1,mp_new,get_beans(state,beans,snakes,width,height,my_snake,i),snakes,width,height,-100000)
->>>>>>> fab9d5964fca44ac8b9f38ef5283585c02bc4961
                 if (tmp>ans):
                     ans=tmp
                     dir=i
@@ -337,11 +333,7 @@ def get_my_action_MINMAX(state,beans,snakes,width,height,my_snake):
         for i in range(4):
             if (Check_available(state,beans,snakes,width,height,my_snake,i)):
                 mp_new=get_map(state,beans,snakes,width, height,my_snake,i)
-<<<<<<< HEAD
-                tmp = it_dfs_min_max([7,6],my_snake^1,mp_new,get_beans(state,beans,snakes,width,height,my_snake,i),snakes,width,height,100000)
-=======
                 tmp = it_dfs_min_max([2,1],my_snake^1,mp_new,get_beans(state,beans,snakes,width,height,my_snake,i),snakes,width,height,100000)
->>>>>>> fab9d5964fca44ac8b9f38ef5283585c02bc4961
                 if (tmp<ans):
                     ans=tmp
                     dir=i

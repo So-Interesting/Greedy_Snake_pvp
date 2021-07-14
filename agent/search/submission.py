@@ -300,10 +300,10 @@ def get_map(state, beans, snakes, width, height, turn, dir):
     y %= width
     Lx = snakes[turn][-1][0]
     Ly = snakes[turn][-1][1]
-    if (state[x][y]==1): mp2[x][y]=turn
+    if (state[x][y]==1): mp2[x][y]=turn + 2
     elif (not (Lx==x and Ly==y)): 
         mp2[Lx][Ly]=0
-        mp2[x][y]=turn
+        mp2[x][y]=turn + 2
     return mp2
 
 def get_my_action_MINMAX(state,beans,snakes,width,height,my_snake):
