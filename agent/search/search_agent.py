@@ -155,7 +155,7 @@ def reborn_snake(state,bean, snakes, width,height, turn, i):
     y1%=width
     y2+=width
     y2%=width
-    while ((state[x][y]!=0 and state[x][y]!=turn) or (state[x1][y1]!=0 and state[x1][y1]!=turn) or (state[x2][y2]!=0 and state[x2][y2]!=turn) or (x==x2 and y==y2)):
+    while ((state[x][y]!=0 and state[x][y]!=turn+2) or (state[x1][y1]!=0 and state[x1][y1]!=turn+2) or (state[x2][y2]!=0 and state[x2][y2]!=turn+2) or (x==x2 and y==y2)):
         x = random.randrange(0, height)
         y = random.randrange(0, width)
         d1=random.randrange(0,4)    

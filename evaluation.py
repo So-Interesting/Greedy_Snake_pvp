@@ -52,7 +52,7 @@ def get_actions(obs, algo, greedy_info, side):
 def join_actions(obs, algo_list, greedy_info):
     first_action = get_actions(obs[0], algo_list[0], greedy_info, side=0)
     second_action = get_actions(obs[1], algo_list[1], greedy_info, side=1)
-    actions = np.zeros(2)
+    actions = np.zeros(2)   
     actions[0] = first_action[:]
     actions[1] = second_action[:]
     return actions
@@ -65,8 +65,12 @@ def run_game(env, algo_list, episode, verbose=False):
     agent_index = [0, 1]
     total_reward = np.zeros(2)
     num_win = np.zeros(3)
-
+    la = time.time()
     for i in range(1, episode + 1):
+        this= time.time()
+        print (this-la)
+        la=this
+        print (i)
         episode_reward = np.zeros(2)
         state, info = env.reset()
 
@@ -132,8 +136,8 @@ if __name__ == "__main__":
     game = make(env_type, conf=None)
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--my_ai", default="search", help="dqn/random/greedy")
-    parser.add_argument("--opponent", default="greedy", help="dqn/random/greedy")
+    parser.add_argument("--my_ai", default="greedy", help="dqn/random/greedy")
+    parser.add_argument("--opponent", default="search", help="dqn/random/greedy")
     parser.add_argument("--episode", default=200)
     args = parser.parse_args()
 
