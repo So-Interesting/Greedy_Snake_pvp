@@ -220,7 +220,7 @@ def greedy_snake(state_map, beans, snakes, width, height, ctrl_agent_index):
         bean_x, bean_y, index = get_min_bean(head_x, head_y, beans_position, width, height, snakes, state_map)
         beans_position.pop(index)
         # print(len(snakes[i]))
-        t = max (4, len(snakes[i])//2, len(snakes[i^1])//2)
+        t = 4
         next_distances = []
         mat= diji(state_map,bean_y,bean_x,width,height)
         # mat = floyd(height, width, snakes)
