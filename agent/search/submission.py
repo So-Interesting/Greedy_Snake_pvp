@@ -61,12 +61,12 @@ def F_calc(state, bean, snakes, width, height):
     else : P4 = 0
     P1 = your_dist - my_dist
     P2 = shape(snakes[0])[0]-shape(snakes[1])[0]
-    P3 = your_sum - my_sum
+    # P3 = your_sum - my_sum
     A=4
     B=6
-    C=1
+    C=0
     D=0
-    return A*P1+B*P2+C*P3+D*P4
+    return A*P1+B*P2+D*P4
 
 def F_calc_greedy_hacker(state, bean, snakes, width, height):
     (your_dist,your_bean,your_sum)= get_bean_distance_all(snakes[1][0][0],snakes[1][0][1],bean,width,height,state)
@@ -75,12 +75,12 @@ def F_calc_greedy_hacker(state, bean, snakes, width, height):
     else : P4 = 0
     P1 = your_dist - my_dist
     P2 = shape(snakes[0])[0]-shape(snakes[1])[0]
-    P3 = your_sum - my_sum
+    # P3 = your_sum - my_sum
     A=4
     B=6
-    C=1
+    # C=1
     D=0
-    return A*P1+B*P2+C*P3+D*P4
+    return A*P1+B*P2+D*P4
 
 def Check_available(states,beans,snakes,width,height,turn,dir):
     x = snakes[turn][0][1]

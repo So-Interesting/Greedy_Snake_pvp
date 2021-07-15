@@ -61,7 +61,8 @@ def F_calc(state, bean, snakes, width, height):
     else : P4 = 0
     P1 = your_dist - my_dist
     P2 = shape(snakes[0])[0]-shape(snakes[1])[0]
-    P3 = your_sum - my_sum
+    # P3 = your_sum - my_sum
+    P3 = 0
     A=4
     B=6
     C=1
@@ -75,7 +76,8 @@ def F_calc_greedy_hacker(state, bean, snakes, width, height):
     else : P4 = 0
     P1 = your_dist - my_dist
     P2 = shape(snakes[0])[0]-shape(snakes[1])[0]
-    P3 = your_sum - my_sum
+    # P3 = your_sum - my_sum
+    P3 = 0
     A=4
     B=6
     C=1

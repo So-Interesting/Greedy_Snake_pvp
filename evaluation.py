@@ -7,7 +7,7 @@ from agent.search.search_agent import search_snake
 from env.chooseenv import make
 from tabulate import tabulate
 import argparse
-
+import time
 
 def print_state(state, actions, step):
     state = np.array(state)
@@ -23,11 +23,15 @@ def get_actions(obs, algo, greedy_info, side):
 
     # dqn
     if algo == 'search':
+        start= time.time()
         actions[:]= search_snake(greedy_info['state'],
                                   greedy_info['beans'],
                                   greedy_info['snakes'],
                                   greedy_info['width'],
                                   greedy_info['height'], side)[:]
+        ed= time.time()
+        if (ed-start>=1): print ("TLE")
+        # print(ed-start)
     elif algo == 'dqn':
         actions[:] = dqn_snake.choose_action([obs])
     elif algo == 'greedy':
@@ -130,7 +134,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--my_ai", default="search", help="dqn/random/greedy")
     parser.add_argument("--opponent", default="greedy", help="dqn/random/greedy")
-    parser.add_argument("--episode", default=100)
+    parser.add_argument("--episode", default=2000)
     args = parser.parse_args()
 
     # [greedy, dqn, random]
