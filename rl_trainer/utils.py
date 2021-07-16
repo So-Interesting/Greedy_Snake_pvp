@@ -69,17 +69,17 @@ def get_observations(state, info, agents_index, obs_dim, height, width):
         # head surroundings
         head_x = snakes_position[i][0][1]
         head_y = snakes_position[i][0][0]
-        head_surrounding = get_surrounding(state, width, height, head_x, head_y)
-        observations[i][2:6] = head_surrounding[:]
+        head_surrounding = get_surrounding_3(state, width, height, head_x, head_y)
+        observations[i][2:10] = head_surrounding[:]
 
         # beans positions
-        observations[i][6:16] = beans_position[:]
+        observations[i][10:20] = beans_position[:]
 
         # other snake positions
         snake_heads = [snake[0] for snake in snakes_position]
         snake_heads = np.array(snake_heads[1:])
         snake_heads -= snakes_position[i][0]
-        observations[i][16:] = snake_heads.flatten()[:]
+        observations[i][20:] = snake_heads.flatten()[:]
 
     return observations
 
@@ -148,6 +148,46 @@ def get_surrounding(state, width, height, x, y):
 
     return surrounding
 
+def get_surrounding_3(state, width, height, x, y):
+    surrounding = [state[(y - 1) % height][(x - 1) % width], 
+                   state[(y - 1) % height][x],
+                   state[(y - 1) % height][(x + 1) % width], 
+                   state[(y + 1) % height][(x - 1) % width], 
+                   state[(y + 1) % height][x],
+                   state[(y + 1) % height][(x + 1) % width],  
+                   state[y][(x - 1) % width],  
+                   state[y][(x + 1) % width]]  
+
+    return surrounding
+
+def diji(state, X, Y, width, height):
+    mp=np.zeros((height,width))
+    for i in range(height):
+        for j in range(width):
+            mp[i][j]=math.inf
+    mp[X][Y]=0
+    vis=np.zeros((height,width))
+    from queue import PriorityQueue as PQ
+    pq=PQ()
+    pq.put((0,(X,Y)))
+    dx = [-1,1,0,0]
+    dy = [0,0,-1,1]
+    while (not pq.empty()):
+        (d, (x,y)) =pq.get()
+        if (vis[x][y]==1): continue
+        vis[x][y] = 1
+        for i in range(4):
+            x1=x+dx[i]
+            y1=y+dy[i]
+            x1 += height
+            x1 %= height
+            y1 += width
+            y1 %= width
+            if (state[x1][y1]==2 or state[x1][y1]==3): continue
+            if (mp[x1][y1]>mp[x][y]+1):
+                mp[x1][y1]=mp[x][y]+1
+                pq.put((mp[x1][y1],(x1,y1)))
+    return mp
 
 def save_config(args, save_path):
     file = open(os.path.join(str(save_path), 'config.yaml'), mode='w', encoding='utf-8')

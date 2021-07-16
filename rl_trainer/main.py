@@ -27,7 +27,7 @@ def main(args):
     print(f'Game board height: {height}')
     action_dim = env.get_action_dim()
     print(f'action dimension: {action_dim}')
-    obs_dim = 18
+    obs_dim = 22
     print(f'observation dimension: {obs_dim}')
 
     # set seed

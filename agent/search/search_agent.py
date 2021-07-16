@@ -238,13 +238,14 @@ def it_dfs_min_max(d,turn,state,bean, snakes, width, height,MinMax):
             tmp= it_dfs_min_max(d,turn^1,get_map(state,bean,snakes,width,height,turn,i),get_beans(state,bean,snakes,width,height,turn,i),get_snakes(state,bean,snakes,width,height,turn,i),width,height,This_MIN_MAX)
             if (turn==0):
                 if (tmp>This_MIN_MAX): This_MIN_MAX=tmp
-                if (This_MIN_MAX>=MinMax): return This_MIN_MAX
+                # if (This_MIN_MAX>=MinMax): return This_MIN_MAX
             else:
                 if (tmp<This_MIN_MAX): This_MIN_MAX=tmp
-                if (This_MIN_MAX<=MinMax): return This_MIN_MAX
+                # if (This_MIN_MAX<=MinMax): return This_MIN_MAX
     if (cnt==0):
-        snakes = reborn_snake(state,bean,snakes,width,height,turn,i)
-        return it_dfs_min_max(d,turn^1,reborn_state(state,bean,snakes,width,height,turn,i),bean,snakes,width,height,This_MIN_MAX)
+        # snakes = reborn_snake(state,bean,snakes,width,height,turn,i)
+        # return it_dfs_min_max(d,turn^1,reborn_state(state,bean,snakes,width,height,turn,i),bean,snakes,width,height,This_MIN_MAX)
+        return This_MIN_MAX
     else:
         return This_MIN_MAX
 
@@ -285,7 +286,7 @@ def search_snake(state,beans,snakes,width,height,my_snake):
         for i in range(4):
             if (Check_available(state,beans,snakes,width,height,my_snake,i)):
                 mp_new=get_map(state,beans, snakes, width, height, my_snake,i)
-                tmp = it_dfs_min_max([3,4],my_snake^1,mp_new,get_beans(state,beans,snakes,width,height,my_snake,i),snakes,width,height,-100000)
+                tmp = it_dfs_min_max([3,4],my_snake^1,mp_new,get_beans(state,beans,snakes,width,height,my_snake,i),get_snakes(state,beans,snakes,width,height,my_snake,i),width,height,-100000)
                 if (tmp>ans):
                     ans=tmp
                     dir=i
@@ -296,7 +297,7 @@ def search_snake(state,beans,snakes,width,height,my_snake):
         for i in range(4):
             if (Check_available(state,beans,snakes,width,height,my_snake,i)):
                 mp_new=get_map(state,beans,snakes,width, height,my_snake,i)
-                tmp = it_dfs_min_max([4,3],my_snake^1,mp_new,get_beans(state,beans,snakes,width,height,my_snake,i),snakes,width,height,100000)
+                tmp = it_dfs_min_max([4,3],my_snake^1,mp_new,get_beans(state,beans,snakes,width,height,my_snake,i),get_snakes(state,beans,snakes,width,height,my_snake,i),width,height,100000)
                 if (tmp<ans):
                     ans=tmp
                     dir=i
