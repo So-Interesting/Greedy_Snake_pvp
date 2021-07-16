@@ -97,11 +97,9 @@ def run_game(g, env_name, player_ids, actions_spaces, policy_list):
     info_before = ''
     while not g.is_terminal():
         step = "step%d" % g.step_cnt
-        if g.step_cnt % 10 == 0:
-            print(step)
-        else:
-            info_dict = {}
-            info_dict["time"] = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
+        print(step)
+        info_dict = {}
+        info_dict["time"] = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
         joint_act = get_joint_action_eval(g, player_ids, policy_list, actions_spaces, info_before)
         next_state, reward, done, info_before, info_after = g.step(joint_act)
         if not g.is_obs_continuous:
