@@ -113,17 +113,38 @@ def keep_safe(X, Y, turn, state, width, height, snakes):
             pq.put((x1,y1))
     return cnt
 
-def get_min_bean(x, y, beans_position, width, height, snakes, state_map):
+def get_min_bean(x, y, beans_position, width, height, snakes, state):
     min_distance = math.inf
     min_x = beans_position[0][1]
     min_y = beans_position[0][0]
     index = 0
-    mp = diji(state_map, y, x, width, height)
+    Ux = snakes[0][0][1]
+    Uy = snakes[0][0][0]
+    id = 1
+    if (Ux== x and Uy==y):
+        Ux = snakes[1][0][1]
+        Uy = snakes[1][0][0]
+        id = 0
+    mat = diji(state,y,x,width, height)
+    matU= diji(state,Uy, Ux, width,height)
     for i, (bean_y, bean_x) in enumerate(beans_position):
         # distance = math.sqrt((x - bean_x) ** 2 + (y - bean_y) ** 2)
+        distance_my = mat[bean_y][bean_x]
+        distance_U = matU[bean_y][bean_x]
+        if (len(snakes[id])<len(snakes[id^1])):
+            distance = distance_my
+        else:
+            if (distance_U == math.inf and distance_my == math.inf):
+                distance = math.inf
+            elif (distance_my == math.inf):
+                    distance = math.inf
+            elif (distance_U == math.inf):
+                distance = distance_my *0.6
+            else:
+                distance = 0.7*distance_my-0.3*distance_U
         # snake_id = get_id(y, x, width)
         # beans_id = get_id(bean_y, bean_x, width)
-        distance = mp[bean_y][bean_x]
+        # distance = mat[snake_id][beans_id]
         if distance < min_distance:
             min_x = bean_x
             min_y = bean_y
