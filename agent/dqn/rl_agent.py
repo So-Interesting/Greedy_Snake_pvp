@@ -46,7 +46,7 @@ def get_observations(state, info, agents_index, obs_dim, height, width):
         # head surroundings
         head_x = snakes_position[j][0][1]
         head_y = snakes_position[j][0][0]
-        head_surrounding = get_surrounding(state, width, height, head_x, head_y)
+        head_surrounding = get_surrounding_3(state, width, height, head_x, head_y)
         observations[i][2:10] = head_surrounding[:]
 
         # beans positions

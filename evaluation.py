@@ -61,7 +61,7 @@ def join_actions(obs, algo_list, greedy_info):
 def run_game(env, algo_list, episode, verbose=False):
     width = env.board_width
     height = env.board_height
-    obs_dim = 18
+    obs_dim = 22
     agent_index = [0, 1]
     total_reward = np.zeros(2)
     num_win = np.zeros(3)
@@ -134,7 +134,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--my_ai", default="search", help="dqn/random/greedy")
     parser.add_argument("--opponent", default="greedy", help="dqn/random/greedy")
-    parser.add_argument("--episode", default=200)
+    parser.add_argument("--episode", default=20)
     args = parser.parse_args()
 
     # [greedy, dqn, random]
