@@ -10,7 +10,7 @@ class Game(object):
         return current_state
 
     def set_current_state(self, current_state):
-        raise NotImplementedError
+        raise NotImplementedErrorg
 
     def is_terminal(self):
         raise NotImplementedError

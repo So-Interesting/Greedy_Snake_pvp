@@ -132,7 +132,7 @@ def get_min_bean(x, y, beans_position, width, height, snakes, state):
         # distance = math.sqrt((x - bean_x) ** 2 + (y - bean_y) ** 2)
         distance_my = mat[bean_y][bean_x]
         distance_U = matU[bean_y][bean_x]
-        if (len(snakes[id])<len(snakes[id^1])):
+        if (len(snakes[id])+1<=len(snakes[id^1])):
             distance = distance_my
         else:
             if (distance_U == math.inf and distance_my == math.inf):
@@ -141,6 +141,8 @@ def get_min_bean(x, y, beans_position, width, height, snakes, state):
                     distance = math.inf
             elif (distance_U == math.inf):
                 distance = distance_my *0.6
+            elif (distance_U == distance_my == 1):
+                distance = math.inf
             else:
                 distance = 0.9*distance_my-0.1*distance_U
         # snake_id = get_id(y, x, width)
@@ -275,8 +277,20 @@ def greedy_snake(state_map, beans, snakes, width, height, ctrl_agent_index):
     for i in ctrl_agent_index:
         head_x = snakes[i][0][0]
         head_y = snakes[i][0][1]
+        Lx = snakes[i][-1][0]
+        Ly = snakes[i][-1][1]
         len_my= len(snakes[i])
         len_U = len(snakes[i^1])
+        if (len_my > len_U and len_my > 9  and abs(Lx-head_x)+abs(Ly-head_y)==1):
+            tx= Lx-head_x
+            ty= Ly-head_y
+            if(tx==-1): actions.append(0)
+            elif (tx==1): actions.append(1)
+            elif (ty==-1): actions.append(2)
+            elif (ty==1): actions.append(3)
+            else: actions.append(1)
+            return actions
+
         if (len_my < len_U and len_U >= 10):
             if (Check_Circle(snakes, i^1)):
                 dir = bfs(state_map, snakes[i^1][-1:-8:-1],snakes,width,height,i)
