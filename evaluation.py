@@ -4,6 +4,7 @@ from agent.dqn.rl_agent import get_observations
 from agent.greedy.greedy_agent import greedy_snake
 from agent.dqn.rl_agent import agent as dqn_snake
 from agent.search.search_agent import search_snake
+from agent.greedy_old.greedy_old_agent import greedy_snake_old
 from env.chooseenv import make
 from tabulate import tabulate
 import argparse
@@ -45,6 +46,17 @@ def get_actions(obs, algo, greedy_info, side):
                                   greedy_info['snakes'],
                                   greedy_info['width'],
                                   greedy_info['height'], ctrl_agent_index)[:]
+    elif algo == "greedy_old":
+        if side == 0:
+            ctrl_agent_index = [0]
+        else:
+            ctrl_agent_index = [1]
+
+        actions[:] = greedy_snake_old(greedy_info['state'],
+                                  greedy_info['beans'],
+                                  greedy_info['snakes'],
+                                  greedy_info['width'],
+                                  greedy_info['height'], ctrl_agent_index)[:]
 
     return actions
 
@@ -65,8 +77,9 @@ def run_game(env, algo_list, episode, verbose=False):
     agent_index = [0, 1]
     total_reward = np.zeros(2)
     num_win = np.zeros(3)
-
+    print("A")
     for i in range(1, episode + 1):
+        print(i)
         episode_reward = np.zeros(2)
         state, info = env.reset()
 
@@ -114,7 +127,7 @@ def run_game(env, algo_list, episode, verbose=False):
                 print_state(state, action_list, step)
 
         total_reward += episode_reward
-
+    print("B")
     # calculate results
     total_reward /= episode
     print(f'\nResult base on {episode} ', end='')
@@ -125,16 +138,15 @@ def run_game(env, algo_list, episode, verbose=False):
             ['win', num_win[0], num_win[1]]]
     print(tabulate(data, headers=header, tablefmt='pretty', floatfmt='.3f'))
 
-
 if __name__ == "__main__":
     env_type = 'snakes_1v1'
 
     game = make(env_type, conf=None)
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--my_ai", default="search", help="dqn/random/greedy")
+    parser.add_argument("--my_ai", default="greedy_old", help="dqn/random/greedy")
     parser.add_argument("--opponent", default="greedy", help="dqn/random/greedy")
-    parser.add_argument("--episode", default=100)
+    parser.add_argument("--episode", default=1000)
     args = parser.parse_args()
 
     # [greedy, dqn, random]

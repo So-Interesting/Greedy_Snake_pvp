@@ -141,7 +141,7 @@ def get_min_bean(x, y, beans_position, width, height, snakes, state):
             elif (distance_U == math.inf):
                 distance = distance_my *0.6
             else:
-                distance = 0.7*distance_my-0.3*distance_U
+                distance = 0.9*distance_my-0.1*distance_U
         # snake_id = get_id(y, x, width)
         # beans_id = get_id(bean_y, bean_x, width)
         # distance = mat[snake_id][beans_id]
@@ -268,8 +268,8 @@ def greedy_snake(state_map, beans, snakes, width, height, ctrl_agent_index):
             else: Blok[i]=55
             if (head_surrounding[i]>1): D[i]=-10000
             else: D[i]= Cnt_d(state_map,beans,snakes,width,height,ctrl_agent_index[0],i)
-            Tup.append((Blok[i],-dis[i],D[i]))
-        actions.append(Tup.index(min(Tup))) 
+            Tup.append((Blok[i],-dis[i],D[i],i))
+        actions.append(Tup.index(max(Tup))) 
         # head_y_tmp = (head_y - 1) % height
         # head_id_tmp = get_id(head_y_tmp, head_x, width)
         # up_distance = math.inf if head_surrounding[0] > 1 or keep_safe(head_y_tmp,head_x,ctrl_agent_index[0],state_map,width,height,snakes)<t  else \
