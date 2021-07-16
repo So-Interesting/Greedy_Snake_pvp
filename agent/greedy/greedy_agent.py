@@ -271,7 +271,7 @@ def bfs(state, target, snakes, width, height, turn):
                 Q.put((step+1,x1,y1,dir))
     return -1
 
-def greedy_snake(state_map, beans, snakes, width, height, ctrl_agent_index):
+def greedy_snake(state_map, beans, snakes, width, height, ctrl_agent_index, Current_Step):
     beans_position = copy.deepcopy(beans)
     actions = []
     for i in ctrl_agent_index:

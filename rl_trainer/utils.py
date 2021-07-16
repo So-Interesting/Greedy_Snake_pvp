@@ -55,6 +55,7 @@ def mlp(sizes,
 # Head surroundings:    2:head_up; 3:head_down; 4:head_left; 5:head_right
 # Beans positions:      (6, 7) (8, 9) (10, 11) (12, 13) (14, 15)
 # Other snake positions: (16, 17) -- (other_x - self_x, other_y - self_y)
+
 def get_observations(state, info, agents_index, obs_dim, height, width):
     state = np.array(state)
     state = np.squeeze(state, axis=2)

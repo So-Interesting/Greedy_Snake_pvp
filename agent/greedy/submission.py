@@ -241,7 +241,7 @@ def bfs(state, target, snakes, width, height, turn):
                 Q.put((step+1,x1,y1,dir))
     return -1
 
-def greedy_snake(state_map, beans, snakes, width, height, ctrl_agent_index):
+def greedy_snake(state_map, beans, snakes, width, height, ctrl_agent_index, Current_Step):
     beans_position = copy.deepcopy(beans)
     actions = []
     for i in ctrl_agent_index:
@@ -306,21 +306,26 @@ def to_joint_action(actions, num_agent):
         joint_action.append(one_hot_action)
     return joint_action
 
-from functools import wraps
-current_step=0
-def wrapper(func):  # func = my_controller
-    @wraps(func)
-    def inner(*args, **kwargs):
-                                         #step1
-        ret = func(*args, **kwargs)
-        global current_step
-        current_step+=1
-        print(current_step)                           #step3
-        return ret
-    return inner
 
-@wrapper   # my_controller = wrapper(my_controller)
+current_step2=0
+# from functools import wraps
+# current_step=0
+# def wrapper(func):  # func = my_controller
+#     @wraps(func)
+#     def inner(*args, **kwargs):
+#                                          #step1
+#         ret = func(*args, **kwargs)
+#         global current_step
+#         current_step+=1
+#         print(current_step)                           #step3
+#         return ret
+#     return inner
+
+# @wrapper   # my_controller = wrapper(my_controller)
 def my_controller(observation_list, action_space_list, is_act_continuous=False):
+    global current_step2
+    current_step2 += 1
+    print (current_step2,"dd")
     joint_action = []
     width = observation_list[0]['board_width']
     height = observation_list[0]['board_height']
@@ -336,6 +341,6 @@ def my_controller(observation_list, action_space_list, is_act_continuous=False):
         state[i[0], i[1]] = 2
     for i in snakes[1]:
         state[i[0], i[1]] = 3
-    actions = greedy_snake(state, beans, snakes, width, height, [mysnake])
+    actions = greedy_snake(state, beans, snakes, width, height, [mysnake], current_step2)
     joint_action = to_joint_action(actions, 1)          #step2
     return joint_action                                  #step4

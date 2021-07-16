@@ -1,7 +1,7 @@
 import numpy as np
 
 from agent.dqn.rl_agent import get_observations
-from agent.greedy.greedy_agent import greedy_snake
+from agent.greedy.greedy_agent import Cnt_d, greedy_snake
 from agent.dqn.rl_agent import agent as dqn_snake
 from agent.search.search_agent import search_snake
 from agent.greedy_old.greedy_old_agent import greedy_snake_old
@@ -17,7 +17,7 @@ def print_state(state, actions, step):
     print(f'state:\n{state}')
     print(f'actions: {actions}\n')
 
-
+Cnt = 0
 def get_actions(obs, algo, greedy_info, side):
 
     actions = np.random.randint(4, size=1)
@@ -36,6 +36,8 @@ def get_actions(obs, algo, greedy_info, side):
     elif algo == 'dqn':
         actions[:] = dqn_snake.choose_action([obs])
     elif algo == 'greedy':
+        global Cnt
+        Cnt += 1
         if side == 0:
             ctrl_agent_index = [0]
         else:
@@ -45,7 +47,7 @@ def get_actions(obs, algo, greedy_info, side):
                                   greedy_info['beans'],
                                   greedy_info['snakes'],
                                   greedy_info['width'],
-                                  greedy_info['height'], ctrl_agent_index)[:]
+                                  greedy_info['height'], ctrl_agent_index, Cnt)[:]
     elif algo == "greedy_old":
         if side == 0:
             ctrl_agent_index = [0]
