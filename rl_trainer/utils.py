@@ -92,7 +92,7 @@ def get_reward(info, snake_index, reward, final_result):
         elif final_result == 2:     # done and lose
             step_reward[i] -= 50
         elif final_result == 3:     # done and draw
-            step_reward[i] -= 20
+            step_reward[i] -= 0
         else:                       # not done
             if reward[i] > 0:           # eat a bean
                 step_reward[i] += 20
