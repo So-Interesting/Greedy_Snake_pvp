@@ -1,6 +1,7 @@
 import copy
 import math
 import numpy as np
+from numpy.lib import stride_tricks
 from torch._C import dtype
 
 def get_id(x, y, width):
@@ -232,12 +233,57 @@ def Cnt_d(state, beans, snakes, width, height, turn, dir):
             if (d[i][j]<=1 and mp[i][j]<2):
                 cnt += 1
     return cnt
+
+def Check_Circle(snakes, id):
+    x = snakes[id][0][0]
+    y = snakes[id][0][1]
+    Lx = snakes[id][-1][0]
+    Ly = snakes[id][-1][1]
+    d = abs(x-Lx) +abs(y-Ly)
+    if (d==1): return True
+    else: return False
+
+
+def bfs(state, target, snakes, width, height, turn):
+    from queue import Queue
+    Q = Queue()
+    Q.put((0,snakes[turn][0][0],snakes[turn][0][1],-1))  # step, x,y, fir_dir
+    dx = [-1,1,0,0]
+    dy = [0,0,-1,1]
+    while (not Q.empty()):
+        if (step > 7): return -1
+        (step, x,y , dir) = Q.get()
+        for i in range(4):
+            x1 = x + dx[i]
+            y1 = y + dy[i]
+            x1 += height
+            y1 += width
+            x1 %= height
+            y1 %= width
+            if (x1==target[step+1][0] and y1 == target[step+1][1]):
+                return dir
+            if (state[x1][y1]>1): continue
+            if (dir == -1):
+                Q.put((step+1, x1,y1,i))
+            else:
+                Q.put((step+1,x1,y1,dir))
+    return -1
+
 def greedy_snake(state_map, beans, snakes, width, height, ctrl_agent_index):
     beans_position = copy.deepcopy(beans)
     actions = []
     for i in ctrl_agent_index:
         head_x = snakes[i][0][0]
         head_y = snakes[i][0][1]
+        len_my= len(snakes[i])
+        len_U = len(snakes[i^1])
+        if (len_my < len_U and len_U >= 10):
+            if (Check_Circle(snakes, i^1)):
+                dir = bfs(state_map, snakes[i^1][-1:-8:-1],snakes,width,height,i)
+                if (dir != -1): 
+                    actions.append(dir)
+                    return actions
+                    
         head_surrounding = get_surrounding(state_map, width, height, head_y, head_x)
         bean_y, bean_x, index = get_min_bean(head_y, head_x, beans_position, width, height, snakes, state_map)
         # beans_position.pop(index)
