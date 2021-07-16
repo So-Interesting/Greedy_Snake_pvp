@@ -306,6 +306,20 @@ def to_joint_action(actions, num_agent):
         joint_action.append(one_hot_action)
     return joint_action
 
+from functools import wraps
+current_step=0
+def wrapper(func):  # func = my_controller
+    @wraps(func)
+    def inner(*args, **kwargs):
+                                         #step1
+        ret = func(*args, **kwargs)
+        global current_step
+        current_step+=1
+        print(current_step)                           #step3
+        return ret
+    return inner
+
+@wrapper   # my_controller = wrapper(my_controller)
 def my_controller(observation_list, action_space_list, is_act_continuous=False):
     joint_action = []
     width = observation_list[0]['board_width']
@@ -323,5 +337,5 @@ def my_controller(observation_list, action_space_list, is_act_continuous=False):
     for i in snakes[1]:
         state[i[0], i[1]] = 3
     actions = greedy_snake(state, beans, snakes, width, height, [mysnake])
-    joint_action = to_joint_action(actions, 1)
-    return joint_action
+    joint_action = to_joint_action(actions, 1)          #step2
+    return joint_action                                  #step4
