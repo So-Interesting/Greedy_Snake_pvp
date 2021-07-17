@@ -236,14 +236,22 @@ def Cnt_d(state, beans, snakes, width, height, turn, dir):
                 cnt += 1
     return cnt
 
-def Check_Circle(snakes, id):
+def Check_Circle(snakes, id, width, height):
     x = snakes[id][0][0]
     y = snakes[id][0][1]
     Lx = snakes[id][-1][0]
     Ly = snakes[id][-1][1]
-    d = abs(x-Lx) +abs(y-Ly)
-    if (d==1): return True
-    else: return False
+    dx = [-1,1,0,0]
+    dy = [0,0,-1,1]
+    for i in range(4):
+        x1 = x + dx[i]
+        y1 = y + dy[i]
+        x1 += height
+        y1 += width
+        x1 %= height
+        y1 %= width
+        if (x1==Lx and y1 == Ly): return (True,i)
+    return (False,-1)
 
 
 def bfs(state, target, snakes, width, height, turn):
@@ -285,18 +293,14 @@ def greedy_snake(state_map, beans, snakes, width, height, ctrl_agent_index, Curr
         Ly = snakes[i][-1][1]
         len_my= len(snakes[i])
         len_U = len(snakes[i^1])
-        if (len_my > len_U and len_my > 9  and abs(Lx-head_x)+abs(Ly-head_y)==1):
-            tx= Lx-head_x
-            ty= Ly-head_y
-            if(tx==-1): actions.append(0)
-            elif (tx==1): actions.append(1)
-            elif (ty==-1): actions.append(2)
-            elif (ty==1): actions.append(3)
-            else: actions.append(1)
+        (Flag, dirt) = Check_Circle(snakes,i,width,height) 
+        if (len_my > len_U and len_my > 9  and Flag):
+            actions.append(dirt)
             return actions
 
         if (len_my < len_U and len_U >= 10):
-            if (Check_Circle(snakes, i^1)):
+            (Flag, dirt) = Check_Circle(snakes,i^1,width,height) 
+            if (Flag):
                 (dir,NEED_step) = bfs(state_map, snakes[i^1][-1:-10:-1],snakes,width,height,i)
                 if (dir != -1 and NEED_step < 50-Current_Step): 
                     actions.append(dir)
