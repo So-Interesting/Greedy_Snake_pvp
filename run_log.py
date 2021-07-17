@@ -102,13 +102,12 @@ def run_game(g, env_name, player_ids, actions_spaces, policy_list):
         info_dict["time"] = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
         joint_act = get_joint_action_eval(g, player_ids, policy_list, actions_spaces, info_before)
         next_state, reward, done, info_before, info_after = g.step(joint_act)
-        if not g.is_obs_continuous:
-            if info_before:
-                info_dict["info_before"] = info_before
-            info_dict["reward"] = reward
-            if info_after:
-                info_dict["info_after"] = info_after
-            steps.append(info_dict)
+        # if info_before:
+        info_dict["info_before"] = info_before
+        info_dict["reward"] = reward
+        # if info_after:
+        info_dict["info_after"] = info_after
+        steps.append(info_dict)
 
     if not g.is_obs_continuous:
         game_info["steps"] = steps
@@ -134,7 +133,7 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--my_ai", default="greedy", help="dqn/random/greedy")
-    parser.add_argument("--opponent", default="search", help="dqn/random/greedy")
+    parser.add_argument("--opponent", default="random", help="dqn/random/greedy")
     args = parser.parse_args()
 
     policy_list = [args.my_ai, args.opponent]
