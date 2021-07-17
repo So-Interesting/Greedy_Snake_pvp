@@ -2,7 +2,6 @@ import random
 from types import CodeType
 
 from numpy.core.fromnumeric import shape
-from numpy.core.numeric import zeros_like
 import math
 import numpy as np
 

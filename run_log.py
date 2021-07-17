@@ -51,10 +51,11 @@ def get_joint_action_eval(game, player_ids, policy_list, actions_spaces, info_be
             obs_list = game.get_vector_many_observation(game.current_state, players_id_list, info_before)
         elif game.obs_type[policy_i] == "dict":
             obs_list = game.get_dict_many_observation(game.current_state, players_id_list, info_before)
-
+        from copy import deepcopy
+        obs_list_togo = deepcopy(obs_list)
         action_space_list = actions_spaces[policy_i]
         function_name = 'm%d' % policy_i
-        each = eval(function_name)(obs_list, action_space_list, game.is_act_continuous)
+        each = eval(function_name)(obs_list_togo, action_space_list, game.is_act_continuous)
         if len(each) != game.agent_nums[policy_i]:
             error = "模型动作空间维度%d不正确！应该是%d" % (len(each), game.agent_nums[policy_i])
             raise Exception(error)
@@ -101,12 +102,14 @@ def run_game(g, env_name, player_ids, actions_spaces, policy_list):
         info_dict = {}
         info_dict["time"] = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
         joint_act = get_joint_action_eval(g, player_ids, policy_list, actions_spaces, info_before)
+        print(joint_act)
         next_state, reward, done, info_before, info_after = g.step(joint_act)
-        # if info_before:
-        info_dict["info_before"] = info_before
-        info_dict["reward"] = reward
-        # if info_after:
-        info_dict["info_after"] = info_after
+        info_dict["step"]= step
+        if info_before:
+            info_dict["info_before"] = info_before
+            info_dict["reward"] = reward
+        if info_after:
+            info_dict["info_after"] = info_after
         steps.append(info_dict)
 
     if not g.is_obs_continuous:
@@ -132,8 +135,8 @@ if __name__ == "__main__":
     render_mode = True
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--my_ai", default="greedy", help="dqn/random/greedy")
-    parser.add_argument("--opponent", default="random", help="dqn/random/greedy")
+    parser.add_argument("--my_ai", default="search", help="dqn/random/greedy")
+    parser.add_argument("--opponent", default="greedy", help="dqn/random/greedy")
     args = parser.parse_args()
 
     policy_list = [args.my_ai, args.opponent]

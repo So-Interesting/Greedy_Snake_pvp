@@ -223,15 +223,16 @@ def Check_Circle(snakes, id, width, height):
         if (x1==Lx and y1 == Ly): return (True,i)
     return (False,-1)
 
-
 def bfs(state, target, snakes, width, height, turn):
     from queue import Queue
+    # print(target,"target")
     Q = Queue()
-    Q.put((0,snakes[turn][0][0],snakes[turn][0][1],-1))  # step, x,y, fir_dir
+    Q.put((-1,snakes[turn][0][0],snakes[turn][0][1],-1))  # step, x,y, fir_dir
     dx = [-1,1,0,0]
     dy = [0,0,-1,1]
     while (not Q.empty()):
         (step, x,y , dir) = Q.get()
+        # print(step,x,y,dir,"(step,x,y,dir)")
         if (step > 7): return (-1,-1)
         for i in range(4):
             x1 = x + dx[i]
@@ -240,8 +241,11 @@ def bfs(state, target, snakes, width, height, turn):
             y1 += width
             x1 %= height
             y1 %= width
+            # print(x1,y1,"x1,y1")
             if (x1==target[step+1][0] and y1 == target[step+1][1]):
-                return (dir, step+1)
+                # print(x1,y1)
+                if (step==-1): return (i, step+1)
+                else: return (dir, step+1)
             if (state[x1][y1]>1): continue
             if (dir == -1):
                 Q.put((step+1, x1,y1,i))
@@ -249,8 +253,9 @@ def bfs(state, target, snakes, width, height, turn):
                 Q.put((step+1,x1,y1,dir))
     return (-1,-1)
 def Get_NEW_MAP(state, Lx, Ly):
-    state[Lx][Ly]=0
-    return state
+    mp2= copy.deepcopy(state)
+    mp2[Lx][Ly]=0
+    return mp2
 def greedy_snake(state_map, beans, snakes, width, height, ctrl_agent_index, Current_Step):
     beans_position = copy.deepcopy(beans)
     actions = []
@@ -264,12 +269,16 @@ def greedy_snake(state_map, beans, snakes, width, height, ctrl_agent_index, Curr
         (Flag, dirt) = Check_Circle(snakes,i,width,height) 
         if (len_my > len_U and len_my > 9  and Flag):
             actions.append(dirt)
+            # print(777)
             return actions
 
         if (len_my < len_U and len_U >= 10):
             (Flag, dirt) = Check_Circle(snakes,i^1,width,height) 
             if (Flag):
                 (dir,NEED_step) = bfs(state_map, snakes[i^1][-1:-10:-1],snakes,width,height,i)
+                # print(666)
+                # print(dir,NEED_step)
+                # print()
                 if (dir != -1 and NEED_step < 50-Current_Step): 
                     actions.append(dir)
                     return actions
@@ -301,7 +310,6 @@ def greedy_snake(state_map, beans, snakes, width, height, ctrl_agent_index, Curr
             Tup.append((Blok[i],-dis[i],D[i],i))
         actions.append(Tup.index(max(Tup))) 
     return actions
-
 def to_joint_action(actions, num_agent):
     joint_action = []
     for i in range(num_agent):

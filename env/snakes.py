@@ -166,6 +166,8 @@ class SnakeEatBeans(GridGame, GridObservation, DictObservation, ABC):
 
     def get_next_state(self, joint_action):
         not_valid = self.is_not_valid_action(joint_action)
+        print(joint_action)
+        print(not_valid)
         if not not_valid:
             # 各玩家行动
             eat_snakes = [0] * self.n_player
