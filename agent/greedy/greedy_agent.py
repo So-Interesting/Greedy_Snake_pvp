@@ -264,7 +264,7 @@ def bfs(state, target, snakes, width, height, turn):
     while (not Q.empty()):
         (step, x,y , dir) = Q.get()
         # print(step,x,y,dir,"(step,x,y,dir)")
-        if (step > 7): return (-1,-1)
+        if (step > 8): return (-1,-1)
         for i in range(4):
             x1 = x + dx[i]
             y1 = y + dy[i]
@@ -308,15 +308,15 @@ def greedy_snake(state_map, beans, snakes, width, height, ctrl_agent_index, Curr
         Ly = snakes[i][-1][1]
         len_my= len(snakes[i])
         len_U = len(snakes[i^1])
-        (Flag, dirt) = Check_Circle(snakes,i,width,height) 
-        if (len_my > len_U and len_my > 9  and Flag):
-            actions.append(dirt)
-            # print(777)
-            return actions
+        # (Flag, dirt) = Check_Circle(snakes,i,width,height) 
+        # if (len_my > len_U+1 and len_my > 11  and Flag):
+        #     actions.append(dirt)
+        #     # print(777)
+        #     return actions
 
-        if (len_my < len_U and len_U >= 10):
+        if (len_my < len_U-2 and (len_U >= 14 or len_U-len_my>=5)):
             (Flag, dirt) = Check_Circle(snakes,i^1,width,height) 
-            if (Flag):
+            if (Flag and (snakes[i^1][0][0]-snakes[i][0][0]+snakes[i^1][0][1]-snakes[i][0][1])%2==0):
                 (dir,NEED_step) = bfs(state_map, snakes[i^1][-1:-10:-1],snakes,width,height,i)
                 # print(666)
                 # print(dir,NEED_step)
@@ -347,7 +347,7 @@ def greedy_snake(state_map, beans, snakes, width, height, ctrl_agent_index, Curr
                 dis[i]= f(len_my-len_U,len_my,mat[head_x_tmp][head_y_tmp], mat_rear[head_x_tmp][head_y_tmp])
             if (head_surrounding[i]>1): Blok[i]=-100000
             else: Blok[i]= keep_safe(head_x_tmp, head_y_tmp,ctrl_agent_index[0],state_map,width,height,snakes)
-            if (Blok[i]<4): Blok[i]=-100000
+            if (Blok[i]<=4): Blok[i]=-10000
             else: Blok[i]=55
             
             if (head_surrounding[i]>1): D[i]=-10000
