@@ -79,9 +79,9 @@ def run_game(env, algo_list, episode, verbose=False):
     agent_index = [0, 1]
     total_reward = np.zeros(2)
     num_win = np.zeros(3)
-    print("A")
+    # print("A")
     for i in range(1, episode + 1):
-        print(i)
+        # print(i)
         episode_reward = np.zeros(2)
         state, info = env.reset()
 
@@ -129,7 +129,7 @@ def run_game(env, algo_list, episode, verbose=False):
                 print_state(state, action_list, step)
 
         total_reward += episode_reward
-    print("B")
+    # print("B")
     # calculate results
     total_reward /= episode
     print(f'\nResult base on {episode} ', end='')

@@ -55,6 +55,7 @@ def floyd(height, width, snakes):
                 if (mat[i][k] + mat[k][j] < mat[i][j]):
                     mat[i][j] = mat[i][k] + mat[k][j]
     return mat
+
 def diji(state, X, Y, width, height):
     mp=np.zeros((height,width))
     for i in range(height):
@@ -256,6 +257,16 @@ def Get_NEW_MAP(state, Lx, Ly):
     mp2= copy.deepcopy(state)
     mp2[Lx][Ly]=0
     return mp2
+
+def f(delta_len, my_len, d_bean, d_rear):
+    if (delta_len<=0 or my_len<=11): return d_bean
+    if (delta_len==1 or my_len<=12): return d_bean*0.9+d_rear*0.1
+    if (delta_len==2 or my_len<=13): return d_bean*0.7+d_rear*0.3
+    if (delta_len<=4 or my_len<=15): return d_bean*0.5+d_rear*0.5
+    if (delta_len<=6 or my_len<=17): return d_bean*0.3+d_rear*0.7
+    if (delta_len<=9 or my_len<=19): return d_bean*0.1+d_rear*0.9
+    return d_rear
+
 def greedy_snake(state_map, beans, snakes, width, height, ctrl_agent_index, Current_Step):
     beans_position = copy.deepcopy(beans)
     actions = []
@@ -286,6 +297,7 @@ def greedy_snake(state_map, beans, snakes, width, height, ctrl_agent_index, Curr
         head_surrounding = get_surrounding(Map_without_my_rear, width, height, head_y, head_x)
         bean_y, bean_x, index = get_min_bean(head_y, head_x, beans_position, width, height, snakes, state_map)
         mat= diji(state_map,bean_x,bean_y,width,height)
+        mat_rear = diji(state_map, Lx, Ly,width, height)
         dx = [-1,1,0,0]
         dy = [0,0,-1,1]
         dis= np.zeros(4)
@@ -300,11 +312,13 @@ def greedy_snake(state_map, beans, snakes, width, height, ctrl_agent_index, Curr
             head_y_tmp += width
             head_y_tmp %= width
             if (head_surrounding[i]>1): dis[i]=1000000
-            else: dis[i]= mat[head_x_tmp][head_y_tmp]
+            else: 
+                dis[i]= f(len_my-len_U,len_my,mat[head_x_tmp][head_y_tmp], mat_rear[head_x_tmp][head_y_tmp])
             if (head_surrounding[i]>1): Blok[i]=-100000
             else: Blok[i]= keep_safe(head_x_tmp, head_y_tmp,ctrl_agent_index[0],state_map,width,height,snakes)
             if (Blok[i]<4): Blok[i]=-100000
             else: Blok[i]=55
+            
             if (head_surrounding[i]>1): D[i]=-10000
             else: D[i]= Cnt_d(state_map,beans,snakes,width,height,ctrl_agent_index[0],i)
             Tup.append((Blok[i],-dis[i],D[i],i))
