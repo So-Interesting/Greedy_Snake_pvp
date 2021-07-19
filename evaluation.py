@@ -1,9 +1,10 @@
 import numpy as np
 
 from agent.dqn.rl_agent import get_observations
-from agent.greedy.greedy_agent import greedy_snake
+from agent.greedy.greedy_agent import Cnt_d, greedy_snake
 from agent.dqn.rl_agent import agent as dqn_snake
 from agent.search.search_agent import search_snake
+# from agent.greedy_old.greedy_old_agent import greedy_snake_old
 from env.chooseenv import make
 from tabulate import tabulate
 import argparse
@@ -16,7 +17,7 @@ def print_state(state, actions, step):
     print(f'state:\n{state}')
     print(f'actions: {actions}\n')
 
-
+# Cnt = 0
 def get_actions(obs, algo, greedy_info, side):
 
     actions = np.random.randint(4, size=1)
@@ -35,6 +36,8 @@ def get_actions(obs, algo, greedy_info, side):
     elif algo == 'dqn':
         actions[:] = dqn_snake.choose_action([obs])
     elif algo == 'greedy':
+        # global Cnt
+        # Cnt += 1
         if side == 0:
             ctrl_agent_index = [0]
         else:
@@ -45,6 +48,17 @@ def get_actions(obs, algo, greedy_info, side):
                                   greedy_info['snakes'],
                                   greedy_info['width'],
                                   greedy_info['height'], ctrl_agent_index)[:]
+    '''elif algo == "greedy_old":
+        if side == 0:
+            ctrl_agent_index = [0]
+        else:
+            ctrl_agent_index = [1]
+
+        actions[:] = greedy_snake_old(greedy_info['state'],
+                                  greedy_info['beans'],
+                                  greedy_info['snakes'],
+                                  greedy_info['width'],
+                                  greedy_info['height'], ctrl_agent_index)[:]'''
 
     return actions
 
@@ -61,15 +75,15 @@ def join_actions(obs, algo_list, greedy_info):
 def run_game(env, algo_list, episode, verbose=False):
     width = env.board_width
     height = env.board_height
-    obs_dim = 18
+    obs_dim = 28
     agent_index = [0, 1]
     total_reward = np.zeros(2)
     num_win = np.zeros(3)
-
+    print("A")
     for i in range(1, episode + 1):
+        print(i)
         episode_reward = np.zeros(2)
         state, info = env.reset()
-
         obs = get_observations(state, info, agent_index, obs_dim, height, width)
 
         greedy_info = {'state': np.squeeze(np.array(state), axis=2), 'beans': info['beans_position'],
@@ -85,7 +99,6 @@ def run_game(env, algo_list, episode, verbose=False):
         while True:
             next_state, reward, done, _, info = env.step(joint_action)
             episode_reward += reward
-
             if done:
                 if np.sum(episode_reward[0]) > np.sum(episode_reward[1]):
                     num_win[0] += 1
@@ -114,7 +127,7 @@ def run_game(env, algo_list, episode, verbose=False):
                 print_state(state, action_list, step)
 
         total_reward += episode_reward
-
+    print("B")
     # calculate results
     total_reward /= episode
     print(f'\nResult base on {episode} ', end='')
@@ -125,16 +138,15 @@ def run_game(env, algo_list, episode, verbose=False):
             ['win', num_win[0], num_win[1]]]
     print(tabulate(data, headers=header, tablefmt='pretty', floatfmt='.3f'))
 
-
 if __name__ == "__main__":
     env_type = 'snakes_1v1'
 
     game = make(env_type, conf=None)
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--my_ai", default="search", help="dqn/random/greedy")
-    parser.add_argument("--opponent", default="greedy", help="dqn/random/greedy")
-    parser.add_argument("--episode", default=200)
+    parser.add_argument("--my_ai", default="greedy", help="dqn/random/greedy")
+    parser.add_argument("--opponent", default="dqn", help="dqn/random/greedy")
+    parser.add_argument("--episode", default=100)
     args = parser.parse_args()
 
     # [greedy, dqn, random]

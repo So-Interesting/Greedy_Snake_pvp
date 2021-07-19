@@ -25,7 +25,11 @@ def get_surrounding_3(state, width, height, x, y):
                    state[(y + 1) % height][x],
                    state[(y + 1) % height][(x + 1) % width],  
                    state[y][(x - 1) % width],  
-                   state[y][(x + 1) % width]]  
+                   state[y][(x + 1) % width],
+                   state[y][(x - 2) % width],
+                   state[y][(x + 2) % width],
+                   state[(y - 2) % height][x],
+                   state[(y + 2) % height][x]]
 
     return surrounding
 
@@ -44,19 +48,21 @@ def get_observations(state, info, agents_index, obs_dim, height, width):
         observations[i][:2] = snakes_position[j][0][:]
 
         # head surroundings
-        head_x = snakes_position[j][0][1]
-        head_y = snakes_position[j][0][0]
-        head_surrounding = get_surrounding(state, width, height, head_x, head_y)
-        observations[i][2:10] = head_surrounding[:]
-
-        # beans positions
-        observations[i][10:20] = beans_position[:]
+        head_x = snakes_position[i][0][1]
+        head_y = snakes_position[i][0][0]
+        head_surrounding = get_surrounding_3(state, width, height, head_x, head_y)
+        observations[i][2:14] = head_surrounding[:]
 
         # other snake positions
         snake_heads = [snake[0] for snake in snakes_position]
         snake_heads = np.array(snake_heads[1:])
-        snake_heads -= snakes_position[j][0]
-        observations[i][20:] = snake_heads.flatten()[:]
+        snake_heads -= snakes_position[i][0]
+        observations[i][14:16] = snake_heads.flatten()[:]
+        observations[i][16:18] = [len(snake) for snake in snakes_position]
+        # beans positions
+        beans_len = len(beans_position)
+        observations[i][18 : 18 + beans_len] = beans_position[:]
+        if (beans_len < 10) : observations[18 + beans_len:] = 0
     return observations
 
 
@@ -66,11 +72,13 @@ class Critic(nn.Module):
         self.input_size = input_size
         self.output_size = output_size
         self.linear1 = nn.Linear(input_size, hidden_size)
-        self.linear2 = nn.Linear(hidden_size, output_size)
+        self.linear2 = nn.Linear(hidden_size, hidden_size)
+        self.linear3 = nn.Linear(hidden_size, output_size)
 
     def forward(self, x):
         x = F.relu(self.linear1(x))
-        x = self.linear2(x)
+        x = F.relu(self.linear2(x))
+        x = self.linear3(x)
         return x
 
 
@@ -152,11 +160,11 @@ def to_joint_action(actions, num_agent):
         joint_action.append(one_hot_action)
     return joint_action
 
-agent = DQN(18, 4, 1, 256)
+agent = DQN(28, 4, 1, 256)
 agent.load('critic_5000.pth')
 
 def my_controller(observation_list, a, b):
-    obs_dim = 18
+    obs_dim = 28
     obs = observation_list[0]
     board_width = obs['board_width']
     board_height = obs['board_height']

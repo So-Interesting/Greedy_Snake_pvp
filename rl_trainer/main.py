@@ -1,3 +1,4 @@
+# from evaluation import Cnt
 import os
 import argparse
 
@@ -6,13 +7,14 @@ from log_path import make_logpath
 from collections import namedtuple
 from dqn import DQN
 from env.chooseenv import make
+from agent.greedy.greedy_agent import greedy_snake
 from tensorboardX import SummaryWriter
 
 import numpy as np
 import random
 import torch
 
-
+# Cnt = 0
 def main(args):
     env = make('snakes_1v1', conf=None)
     game_name = args.game_name
@@ -27,7 +29,7 @@ def main(args):
     print(f'Game board height: {height}')
     action_dim = env.get_action_dim()
     print(f'action dimension: {action_dim}')
-    obs_dim = 22
+    obs_dim = 28
     print(f'observation dimension: {obs_dim}')
 
     # set seed
@@ -61,25 +63,29 @@ def main(args):
 
         while True:
             action = model.choose_action(obs)
-            actions = append_random(action_dim, action)
-
+            # actions = append_random(action_dim, action)
+            # beans = info['beans_position']
+            # snakes = info['snakes_position']
+            # actions = greedy_snake(np.squeeze(np.array(state), axis=2), beans, snakes, width, height, [1])
             # actions = model.choose_action(obs)
-
+            actions = append_greedy(action_dim, state, info, action, height, width)
+            snakes_cur = info['snakes_position']
             next_state, reward, done, _, info = env.step(env.encode(actions))
-
+            snakes_next = info['snakes_position']
             reward = np.array(reward)
             episode_reward += reward
-
+            snake_my_delta = (len(snakes_next[0]) - len(snakes_cur[0])) 
+            snake_your_delta = (len(snakes_next[1]) - len(snakes_cur[1]))
             if done:
                 if np.sum(episode_reward[0]) > np.sum(episode_reward[1]):
-                    step_reward = get_reward(info, ctrl_agent_index, reward, final_result=1)
+                    step_reward = get_reward(state, info, ctrl_agent_index, reward, snake_my_delta, snake_your_delta, height, width, final_result=1)
                 elif np.sum(episode_reward[0]) < np.sum(episode_reward[1]):
-                    step_reward = get_reward(info, ctrl_agent_index, reward, final_result=2)
+                    step_reward = get_reward(state, info, ctrl_agent_index, reward, snake_my_delta, snake_your_delta, height, width, final_result=2)
                 else:
-                    step_reward = get_reward(info, ctrl_agent_index, reward, final_result=3)
+                    step_reward = get_reward(state, info, ctrl_agent_index, reward, snake_my_delta, snake_your_delta, height, width, final_result=3)
                 next_obs = np.zeros((ctrl_agent_num, obs_dim))
             else:
-                step_reward = get_reward(info, ctrl_agent_index, reward, final_result=0)
+                step_reward = get_reward(state, info, ctrl_agent_index, reward, snake_my_delta, snake_your_delta, height, width, final_result=0)
                 next_obs = get_observations(next_state, info, ctrl_agent_index, obs_dim, height, width)
 
             done = np.array([done] * ctrl_agent_num)
@@ -118,7 +124,7 @@ if __name__ == '__main__':
     parser.add_argument('--algo', default='dqn', help='dqn')
 
     # trainer
-    parser.add_argument('--max_episodes', default=5000, type=int)
+    parser.add_argument('--max_episodes', default=50000, type=int)
     parser.add_argument('--episode_length', default=5000, type=int)
     parser.add_argument('--save_interval', default=1000, type=int)
     parser.add_argument('--model_episode', default=0, type=int)

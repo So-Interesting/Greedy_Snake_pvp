@@ -12,6 +12,7 @@ sys.path.append(str(base_dir))
 from agent.greedy.greedy_agent import greedy_snake
 from types import SimpleNamespace as SN
 import yaml
+import math
 import os
 
 device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
@@ -70,39 +71,75 @@ def get_observations(state, info, agents_index, obs_dim, height, width):
         head_x = snakes_position[i][0][1]
         head_y = snakes_position[i][0][0]
         head_surrounding = get_surrounding_3(state, width, height, head_x, head_y)
-        observations[i][2:10] = head_surrounding[:]
-
-        # beans positions
-        observations[i][10:20] = beans_position[:]
+        observations[i][2:14] = head_surrounding[:]
 
         # other snake positions
         snake_heads = [snake[0] for snake in snakes_position]
         snake_heads = np.array(snake_heads[1:])
         snake_heads -= snakes_position[i][0]
-        observations[i][20:] = snake_heads.flatten()[:]
-
+        observations[i][14:16] = snake_heads.flatten()[:]
+        observations[i][16:18] = [len(snake) for snake in snakes_position]
+        # beans positions
+        beans_len = len(beans_position)
+        observations[i][18 : 18 + beans_len] = beans_position[:]
+        if (beans_len < 10) : observations[18 + beans_len:] = 0
     return observations
 
+def diji(state, X, Y, width, height):
+    mp=np.zeros((height,width))
+    for i in range(height):
+        for j in range(width):
+            mp[i][j]=math.inf
+    mp[X][Y]=0
+    vis=np.zeros((height,width))
+    from queue import PriorityQueue as PQ
+    pq=PQ()
+    pq.put((0,(X,Y)))
+    dx = [-1,1,0,0]
+    dy = [0,0,-1,1]
+    while (not pq.empty()):
+        (d, (x,y)) =pq.get()
+        if (vis[x][y]==1): continue
+        vis[x][y] = 1
+        for i in range(4):
+            x1=x+dx[i]
+            y1=y+dy[i]
+            x1 += height
+            x1 %= height
+            y1 += width
+            y1 %= width
+            if (state[x1][y1]==2 or state[x1][y1]==3): continue
+            if (mp[x1][y1]>mp[x][y]+1):
+                mp[x1][y1]=mp[x][y]+1
+                pq.put((mp[x1][y1],(x1,y1)))
+    return mp
 
-def get_reward(info, snake_index, reward, final_result):
+def get_reward(state, info, snake_index, reward, snake_my_delta, snake_your_delta, height, width, final_result):
+    state = np.squeeze(np.array(state), axis=2)
     step_reward = np.zeros(len(snake_index))
     for i in snake_index:
         if final_result == 1:       # done and won
-            step_reward[i] += 100
+            step_reward[i] += 300
         elif final_result == 2:     # done and lose
-            step_reward[i] -= 50
+            step_reward[i] -= 150
         elif final_result == 3:     # done and draw
-            step_reward[i] -= 0
+            step_reward[i] -= 30
         else:                       # not done
             if reward[i] > 0:           # eat a bean
                 step_reward[i] += 20
             else:                       # just move
                 snakes_position = np.array(info['snakes_position'], dtype=object)
                 beans_position = np.array(info['beans_position'], dtype=object)
+                snakes_len = len(snakes_position)
                 snake_heads = [snake[0] for snake in snakes_position]
                 self_head = np.array(snake_heads[i])
-                dists = [np.sqrt(np.sum(np.square(other_head - self_head))) for other_head in beans_position]
+                dists = [min(abs(self_head[0] - other_head[0]), abs(self_head[0] + other_head[0] + 2 - height)) + 
+                        min(abs(self_head[1] - other_head[1]), abs(self_head[1] + other_head[1] + 2 - width))
+                        for other_head in beans_position]
+                # [np.sqrt(np.sum(np.square(other_head - self_head))) for other_head in beans_position]
                 step_reward[i] -= min(dists)
+                step_reward[i] += snake_my_delta * 30
+                step_reward[i] += snake_your_delta * (-10)
                 if reward[i] < 0:
                     step_reward[i] -= 10
     return step_reward
@@ -139,6 +176,20 @@ def logits_greedy(state, info, logits, height, width):
 
     return action_list
 
+def append_greedy(act_dim, state, info, action, height, width):
+    state = np.squeeze(np.array(state), axis=2)
+    beans = info['beans_position']
+    snakes = info['snakes_position']
+
+    action = torch.Tensor([action]).to(device)
+    logits_action = np.array([out for out in action])
+    greedy_action = greedy_snake(state, beans, snakes, width, height, [1])
+    
+    action_list = np.zeros(2)
+    action_list[0] = logits_action[0]
+    action_list[1] = greedy_action[0]
+
+    return action_list
 
 def get_surrounding(state, width, height, x, y):
     surrounding = [state[(y - 1) % height][x],  # up
@@ -156,38 +207,14 @@ def get_surrounding_3(state, width, height, x, y):
                    state[(y + 1) % height][x],
                    state[(y + 1) % height][(x + 1) % width],  
                    state[y][(x - 1) % width],  
-                   state[y][(x + 1) % width]]  
+                   state[y][(x + 1) % width],
+                   state[y][(x - 2) % width],
+                   state[y][(x + 2) % width],
+                   state[(y - 2) % height][x],
+                   state[(y + 2) % height][x]]  
 
     return surrounding
 
-def diji(state, X, Y, width, height):
-    mp=np.zeros((height,width))
-    for i in range(height):
-        for j in range(width):
-            mp[i][j]=math.inf
-    mp[X][Y]=0
-    vis=np.zeros((height,width))
-    from queue import PriorityQueue as PQ
-    pq=PQ()
-    pq.put((0,(X,Y)))
-    dx = [-1,1,0,0]
-    dy = [0,0,-1,1]
-    while (not pq.empty()):
-        (d, (x,y)) =pq.get()
-        if (vis[x][y]==1): continue
-        vis[x][y] = 1
-        for i in range(4):
-            x1=x+dx[i]
-            y1=y+dy[i]
-            x1 += height
-            x1 %= height
-            y1 += width
-            y1 %= width
-            if (state[x1][y1]==2 or state[x1][y1]==3): continue
-            if (mp[x1][y1]>mp[x][y]+1):
-                mp[x1][y1]=mp[x][y]+1
-                pq.put((mp[x1][y1],(x1,y1)))
-    return mp
 
 def save_config(args, save_path):
     file = open(os.path.join(str(save_path), 'config.yaml'), mode='w', encoding='utf-8')

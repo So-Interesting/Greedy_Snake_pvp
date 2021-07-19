@@ -1,14 +1,14 @@
-from abc import ABC
-
 from env.simulators.gridgame import GridGame
 import random
 from env.obs_interfaces.observation import *
 from util.discrete import Discrete
+import itertools
+import numpy as np
 
 
-class SnakeEatBeans(GridGame, GridObservation, DictObservation, ABC):
+class SnakeEatBeans(GridGame, GridObservation, DictObservation):
     def __init__(self, conf):
-        # 给状态0和1加上预设的颜色值可能会更好一点
+        self.terminate_flg = False
         colors = conf.get('colors', [(255, 255, 255), (255, 140, 0)])
         super(SnakeEatBeans, self).__init__(conf, colors)
         # 0: 没有 1：食物 2-n_player+1:各玩家蛇身
@@ -67,6 +67,7 @@ class SnakeEatBeans(GridGame, GridObservation, DictObservation, ABC):
         self.cur_bean_num = 0
         self.beans_position = []
         self.current_state = self.init_state()
+        self.terminate_flg = False
 
         return self.current_state, self.init_info
 
@@ -140,29 +141,26 @@ class SnakeEatBeans(GridGame, GridObservation, DictObservation, ABC):
         return is_hit
 
     def generate_beans(self):
-        while self.cur_bean_num < self.n_beans and not self.is_terminal():
-            x = random.randrange(0, self.board_height)
-            y = random.randrange(0, self.board_width)
-            new_bean_pos = [x, y]
+        all_valid_positions = set(itertools.product(range(0, self.board_height), range(0, self.board_width)))
+        all_valid_positions = all_valid_positions - set(map(tuple, self.beans_position))
+        for positions in self.snakes_position.values():
+            all_valid_positions = all_valid_positions - set(map(tuple, positions))
 
-            # 检查豆子位置是否重复
-            is_bean_repeated = False
-            for bean in self.beans_position:
-                if bean == new_bean_pos:
-                    is_bean_repeated = True
-                    break
-            if not is_bean_repeated:
-                for positions in self.snakes_position.values():
-                    for pos in positions:
-                        if pos == new_bean_pos:
-                            is_bean_repeated = True
-                            break
-                    if is_bean_repeated:
-                        break
+        left_bean_num = self.n_beans - self.cur_bean_num
+        all_valid_positions = np.array(list(all_valid_positions))
+        left_valid_positions = len(all_valid_positions)
 
-            if not is_bean_repeated:
-                self.beans_position.append(new_bean_pos)
-                self.cur_bean_num += 1
+        new_bean_num = left_bean_num if left_valid_positions > left_bean_num else left_valid_positions
+
+        if left_valid_positions > 0:
+            new_bean_positions_idx = np.random.choice(left_valid_positions, size=new_bean_num, replace=False)
+            new_bean_positions = all_valid_positions[new_bean_positions_idx]
+        else:
+            new_bean_positions = []
+
+        for new_bean_pos in new_bean_positions:
+            self.beans_position.append(list(new_bean_pos))
+            self.cur_bean_num += 1
 
     def get_next_state(self, joint_action):
         not_valid = self.is_not_valid_action(joint_action)
@@ -278,7 +276,9 @@ class SnakeEatBeans(GridGame, GridObservation, DictObservation, ABC):
                                 return True
             return False
 
-        can_regenerate()
+        flg = can_regenerate()
+        if not flg:
+            self.terminate_flg = True
         return snake
 
     def is_not_valid_action(self, joint_action):
@@ -293,11 +293,9 @@ class SnakeEatBeans(GridGame, GridObservation, DictObservation, ABC):
 
     def get_reward(self, joint_action):
         r = [0] * self.n_player
-        self.won = [0] * self.n_player
         for i in range(self.n_player):
             r[i] = self.players[i].snake_reward
             self.n_return[i] += r[i]
-        # print("score:", self.won)
         return r
 
     def is_terminal(self):
@@ -305,7 +303,9 @@ class SnakeEatBeans(GridGame, GridObservation, DictObservation, ABC):
         for s in self.players:
             all_member += len(s.segments)
 
-        return self.step_cnt > self.max_step or all_member > self.board_height * self.board_width
+        is_done = self.step_cnt > self.max_step or all_member > self.board_height * self.board_width
+
+        return is_done or self.terminate_flg
 
     def encode(self, actions):
         joint_action = self.init_action_space()
