@@ -6,6 +6,7 @@ from utils import *
 from log_path import make_logpath
 from collections import namedtuple
 from dqn import DQN
+from ddqn import DDQN
 from env.chooseenv import make
 from agent.greedy.greedy_agent import greedy_snake
 from tensorboardX import SummaryWriter
@@ -29,7 +30,7 @@ def main(args):
     print(f'Game board height: {height}')
     action_dim = env.get_action_dim()
     print(f'action dimension: {action_dim}')
-    obs_dim = 28
+    obs_dim = 41
     print(f'observation dimension: {obs_dim}')
 
     # set seed
@@ -50,12 +51,13 @@ def main(args):
         save_config(args, log_dir)
 
     Transition = namedtuple('Transition', ['state', 'action', 'reward', 'next_state', 'done'])
+    # model = DQN(obs_dim, action_dim, ctrl_agent_num, args)
     model = DQN(obs_dim, action_dim, ctrl_agent_num, args)
     episode = 0
 
     while episode < args.max_episodes:
         state, info = env.reset()
-        obs = get_observations(state, info, ctrl_agent_index, obs_dim, height, width)
+        obs = get_observations(state, info, ctrl_agent_index, obs_dim, height, width, 0)
 
         episode += 1
         step = 0
@@ -68,7 +70,7 @@ def main(args):
             # snakes = info['snakes_position']
             # actions = greedy_snake(np.squeeze(np.array(state), axis=2), beans, snakes, width, height, [1])
             # actions = model.choose_action(obs)
-            actions = append_greedy(action_dim, state, info, action, height, width)
+            actions = append_greedy(action_dim, state, info, action, height, width, step)
             snakes_cur = info['snakes_position']
             next_state, reward, done, _, info = env.step(env.encode(actions))
             snakes_next = info['snakes_position']
@@ -86,7 +88,7 @@ def main(args):
                 next_obs = np.zeros((ctrl_agent_num, obs_dim))
             else:
                 step_reward = get_reward(state, info, ctrl_agent_index, reward, snake_my_delta, snake_your_delta, height, width, final_result=0)
-                next_obs = get_observations(next_state, info, ctrl_agent_index, obs_dim, height, width)
+                next_obs = get_observations(next_state, info, ctrl_agent_index, obs_dim, height, width, step)
 
             done = np.array([done] * ctrl_agent_num)
 
