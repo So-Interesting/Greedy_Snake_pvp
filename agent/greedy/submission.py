@@ -89,7 +89,9 @@ def get_min_bean(x, y, beans_position, width, height, snakes, state):
     min_distance = math.inf
     min_x = beans_position[0][1]
     min_y = beans_position[0][0]
+    min_distance_U = math.inf
     index = 0
+    index_U= 0
     Ux = snakes[0][0][1]
     Uy = snakes[0][0][0]
     id = 1
@@ -100,22 +102,31 @@ def get_min_bean(x, y, beans_position, width, height, snakes, state):
     mat = diji(state,y,x,width, height)
     matU= diji(state,Uy, Ux, width,height)
     for i, (bean_y, bean_x) in enumerate(beans_position):
+        distance_U = matU[bean_y][bean_x]
+        if distance_U < min_distance_U:
+            min_distance_U = distance_U
+            index_U = i
+
+    for i, (bean_y, bean_x) in enumerate(beans_position):
         # distance = math.sqrt((x - bean_x) ** 2 + (y - bean_y) ** 2)
         distance_my = mat[bean_y][bean_x]
         distance_U = matU[bean_y][bean_x]
-        if (len(snakes[id])+1<=len(snakes[id^1])):
-            distance = distance_my
+        if (distance_U<distance_my and index_U == i):
+            distance = distance_my+6
         else:
-            if (distance_U == math.inf and distance_my == math.inf):
-                distance = math.inf
-            elif (distance_my == math.inf):
-                    distance = math.inf
-            elif (distance_U == math.inf):
-                distance = distance_my *0.6
-            elif (distance_U == distance_my == 1):
-                distance = math.inf
+            if (len(snakes[id])+1<=len(snakes[id^1])):
+                distance = distance_my
             else:
-                distance = 0.9*distance_my-0.1*distance_U
+                if (distance_U == math.inf and distance_my == math.inf):
+                    distance = math.inf
+                elif (distance_my == math.inf):
+                        distance = math.inf
+                elif (distance_U == math.inf):
+                    distance = distance_my *0.6
+                elif (distance_U == distance_my == 1):
+                    distance = math.inf
+                else:
+                    distance = 0.8*distance_my-0.2*distance_U
         # snake_id = get_id(y, x, width)
         # beans_id = get_id(bean_y, bean_x, width)
         # distance = mat[snake_id][beans_id]

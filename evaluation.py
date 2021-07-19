@@ -4,7 +4,7 @@ from agent.dqn.rl_agent import get_observations
 from agent.greedy.greedy_agent import Cnt_d, greedy_snake
 from agent.dqn.rl_agent import agent as dqn_snake
 from agent.search.search_agent import search_snake
-# from agent.greedy_old.greedy_old_agent import greedy_snake_old
+from agent.greedy_old.greedy_old_agent import greedy_snake_old
 from env.chooseenv import make
 from tabulate import tabulate
 import argparse
@@ -58,7 +58,7 @@ def get_actions(obs, algo, greedy_info, side):
                                   greedy_info['beans'],
                                   greedy_info['snakes'],
                                   greedy_info['width'],
-                                  greedy_info['height'], ctrl_agent_index)[:]
+                                  greedy_info['height'], ctrl_agent_index,Cnt)[:]
     '''elif algo == "greedy_old":
         if side == 0:
             ctrl_agent_index = [0]
@@ -156,8 +156,8 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--my_ai", default="greedy", help="dqn/random/greedy")
-    parser.add_argument("--opponent", default="dqn", help="dqn/random/greedy")
-    parser.add_argument("--episode", default=100)
+    parser.add_argument("--opponent", default="greedy_old", help="dqn/random/greedy")
+    parser.add_argument("--episode", default=1000)
     args = parser.parse_args()
 
     # [greedy, dqn, random]
