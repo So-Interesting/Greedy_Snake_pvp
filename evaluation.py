@@ -17,7 +17,7 @@ def print_state(state, actions, step):
     print(f'state:\n{state}')
     print(f'actions: {actions}\n')
 
-# Cnt = 0
+Cnt = 0
 def get_actions(obs, algo, greedy_info, side):
 
     actions = np.random.randint(4, size=1)
@@ -36,14 +36,25 @@ def get_actions(obs, algo, greedy_info, side):
     elif algo == 'dqn':
         actions[:] = dqn_snake.choose_action([obs])
     elif algo == 'greedy':
-        # global Cnt
-        # Cnt += 1
+        global Cnt
+        Cnt += 1
         if side == 0:
             ctrl_agent_index = [0]
         else:
             ctrl_agent_index = [1]
 
         actions[:] = greedy_snake(greedy_info['state'],
+                                  greedy_info['beans'],
+                                  greedy_info['snakes'],
+                                  greedy_info['width'],
+                                  greedy_info['height'], ctrl_agent_index, Cnt)[:]
+    elif algo == "greedy_old":
+        if side == 0:
+            ctrl_agent_index = [0]
+        else:
+            ctrl_agent_index = [1]
+
+        actions[:] = greedy_snake_old(greedy_info['state'],
                                   greedy_info['beans'],
                                   greedy_info['snakes'],
                                   greedy_info['width'],
@@ -127,7 +138,7 @@ def run_game(env, algo_list, episode, verbose=False):
                 print_state(state, action_list, step)
 
         total_reward += episode_reward
-    print("B")
+    # print("B")
     # calculate results
     total_reward /= episode
     print(f'\nResult base on {episode} ', end='')
