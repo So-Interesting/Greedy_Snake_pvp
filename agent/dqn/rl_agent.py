@@ -52,23 +52,29 @@ def get_observations(state, info, agents_index, obs_dim, height, width, step):
         head_y = snakes_position[i][0][0]
         head_surrounding = get_surrounding_3(state, width, height, head_x, head_y)
         observations[i][2:14] = head_surrounding[:]
+        observations[i][14:16] = [head_x, head_y]
+        observations[i][16:18] = [snakes_position[i][1][1],  snakes_position[i][1][0]]
+        observations[i][18:20] = [snakes_position[i][-1][1],  snakes_position[i][-1][0]]
 
         head_x_U = snakes_position[i ^ 1][0][1]
         head_y_U = snakes_position[i ^ 1][0][0]
         head_surrounding = get_surrounding_3(state, width, height, head_x_U, head_y_U)
-        observations[i][14:26] = head_surrounding[:]
+        observations[i][20:32] = head_surrounding[:]
+        observations[i][32:34] = [head_x_U, head_y_U]
+        observations[i][34:36] = [snakes_position[i^1][1][1],  snakes_position[i^1][1][0]]
+        observations[i][36:38] = [snakes_position[i^1][-1][1],  snakes_position[i^1][-1][0]]
         # other snake positions
         snake_heads = [snake[0] for snake in snakes_position]
         snake_heads = np.array(snake_heads[1:])
         snake_heads -= snakes_position[i][0]
-        observations[i][26:28] = snake_heads.flatten()[:]
-        observations[i][28:30] = [len(snake) for snake in snakes_position]
+        observations[i][38:40] = snake_heads.flatten()[:]
+        observations[i][40:42] = [len(snake) for snake in snakes_position]
 
-        observations[i][30] = step
+        observations[i][42] = step
         # beans positions
         beans_len = len(beans_position)
-        observations[i][31 : 31 + beans_len] = beans_position[:]
-        if (beans_len < 10) : observations[31 + beans_len:] = 0
+        observations[i][43 : 43 + beans_len] = beans_position[:]
+        if (beans_len < 10) : observations[43 + beans_len:] = 0
     return observations
 
 
@@ -166,11 +172,11 @@ def to_joint_action(actions, num_agent):
         joint_action.append(one_hot_action)
     return joint_action
 
-agent = DQN(41, 4, 1, 256)
+agent = DQN(53, 4, 1, 256)
 agent.load('critic_5000.pth')
 
 def my_controller(observation_list, a, b):
-    obs_dim = 41
+    obs_dim = 53
     obs = observation_list[0]
     board_width = obs['board_width']
     board_height = obs['board_height']

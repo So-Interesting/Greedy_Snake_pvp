@@ -86,7 +86,7 @@ def join_actions(obs, algo_list, greedy_info):
 def run_game(env, algo_list, episode, verbose=False):
     width = env.board_width
     height = env.board_height
-    obs_dim = 28
+    obs_dim = 53
     agent_index = [0, 1]
     total_reward = np.zeros(2)
     num_win = np.zeros(3)
@@ -95,7 +95,7 @@ def run_game(env, algo_list, episode, verbose=False):
         print(i)
         episode_reward = np.zeros(2)
         state, info = env.reset()
-        obs = get_observations(state, info, agent_index, obs_dim, height, width)
+        obs = get_observations(state, info, agent_index, obs_dim, height, width, 0)
 
         greedy_info = {'state': np.squeeze(np.array(state), axis=2), 'beans': info['beans_position'],
                        'snakes': info['snakes_position'], 'width': width, 'height': height}
@@ -126,7 +126,7 @@ def run_game(env, algo_list, episode, verbose=False):
 
             state = next_state
             step += 1
-            obs = get_observations(state, info, agent_index, obs_dim, height, width)
+            obs = get_observations(state, info, agent_index, obs_dim, height, width, step)
 
             greedy_info = {'state': np.squeeze(np.array(state), axis=2), 'beans': info['beans_position'],
                            'snakes': info['snakes_position'], 'width': width, 'height': height}

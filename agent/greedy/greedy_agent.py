@@ -264,7 +264,7 @@ def bfs(state, target, snakes, width, height, turn):
     while (not Q.empty()):
         (step, x,y , dir) = Q.get()
         # print(step,x,y,dir,"(step,x,y,dir)")
-        if (step > 8): return (-1,-1)
+        if (step > 7): return (-1,-1)
         for i in range(4):
             x1 = x + dx[i]
             y1 = y + dy[i]
