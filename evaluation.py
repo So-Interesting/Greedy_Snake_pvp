@@ -86,7 +86,7 @@ def join_actions(obs, algo_list, greedy_info):
 def run_game(env, algo_list, episode, verbose=False):
     width = env.board_width
     height = env.board_height
-    obs_dim = 53
+    obs_dim = 65
     agent_index = [0, 1]
     total_reward = np.zeros(2)
     num_win = np.zeros(3)
