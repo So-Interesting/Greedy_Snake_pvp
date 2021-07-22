@@ -5,7 +5,8 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 import random
-
+from agent.greedy.greedy_agent import greedy_snake
+import numpy as np
 
 class Critic(nn.Module):
     def __init__(self, input_size, output_size, hidden_size):
@@ -51,12 +52,21 @@ class DQN(object):
         self.learn_step_counter = 0
         self.target_replace_iter = args.target_replace
 
-    def choose_action(self, observation, train=True):
+    def choose_action(self, observation, state, info, width, height, Cnt, train=True):
         observation = torch.tensor(observation, dtype=torch.float).view(1, -1)
         if train:
             self.eps = max(self.eps_end, self.eps - self.eps_delay)
             if random.random() < self.eps:
-                action = random.randrange(self.action_dim)
+                # action = random.randrange(self.action_dim)
+                state = np.array(state)
+                state = np.squeeze(state, axis=2)
+                snakes_position = np.array(info['snakes_position'], dtype=object)
+                beans_position = np.array(info['beans_position'])
+                action = greedy_snake(state,
+                                  beans_position,
+                                  snakes_position,
+                                  width,
+                                  height, [0], Cnt)
             else:
                 action = torch.argmax(self.critic_eval(observation)).item()
                 # action = self.critic_eval(observation)

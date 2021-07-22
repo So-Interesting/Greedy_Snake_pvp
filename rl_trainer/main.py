@@ -30,7 +30,7 @@ def main(args):
     print(f'Game board height: {height}')
     action_dim = env.get_action_dim()
     print(f'action dimension: {action_dim}')
-    obs_dim = 49
+    obs_dim = 65
     print(f'observation dimension: {obs_dim}')
 
     # set seed
@@ -64,7 +64,7 @@ def main(args):
         episode_reward = np.zeros(2)
 
         while True:
-            action = model.choose_action(obs)
+            action = model.choose_action(obs, state, info, width, height, step)
             # actions = append_random(action_dim, action)
             # beans = info['beans_position']
             # snakes = info['snakes_position']
@@ -138,8 +138,8 @@ if __name__ == '__main__':
     parser.add_argument('--buffer_size', default=int(1e5), type=int)
     parser.add_argument('--tau', default=0.001, type=float)
     parser.add_argument('--gamma', default=0.95, type=float)
-    parser.add_argument('--lr_a', default=0.0001, type=float)
-    parser.add_argument('--lr_c', default=0.0001, type=float)
+    parser.add_argument('--lr_a', default=0.05, type=float)
+    parser.add_argument('--lr_c', default=0.05, type=float)
     parser.add_argument('--batch_size', default=64, type=int)
     parser.add_argument('--epsilon', default=0.2, type=float)
     parser.add_argument('--epsilon_speed', default=0.99998, type=float)

@@ -8,6 +8,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import random
+import math
 
 def get_surrounding(state, width, height, x, y):
     surrounding = [state[(y - 1) % height][x],  # up
@@ -33,6 +34,77 @@ def get_surrounding_3(state, width, height, x, y):
 
     return surrounding
 
+
+def diji(state, X, Y, width, height):
+    mp=np.zeros((height,width))
+    for i in range(height):
+        for j in range(width):
+            mp[i][j]=math.inf
+    mp[X][Y]=0
+    vis=np.zeros((height,width))
+    from queue import PriorityQueue as PQ
+    pq=PQ()
+    pq.put((0,(X,Y)))
+    dx = [-1,1,0,0]
+    dy = [0,0,-1,1]
+    while (not pq.empty()):
+        (d, (x,y)) =pq.get()
+        if (vis[x][y]==1): continue
+        vis[x][y] = 1
+        for i in range(4):
+            x1=x+dx[i]
+            y1=y+dy[i]
+            x1 += height
+            x1 %= height
+            y1 += width
+            y1 %= width
+            if (state[x1][y1]==2 or state[x1][y1]==3): continue
+            if (mp[x1][y1]>mp[x][y]+1):
+                mp[x1][y1]=mp[x][y]+1
+                pq.put((mp[x1][y1],(x1,y1)))
+    return mp
+
+def get_min_bean(x, y, beans_position, width, height, snakes, state):
+    min_distance = math.inf
+    min_x = beans_position[0][1]
+    min_y = beans_position[0][0]
+    index = 0
+    Ux = snakes[0][0][1]
+    Uy = snakes[0][0][0]
+    id = 1
+    if (Ux== x and Uy==y):
+        Ux = snakes[1][0][1]
+        Uy = snakes[1][0][0]
+        id = 0
+    mat = diji(state,y,x,width, height)
+    matU= diji(state,Uy, Ux, width,height)
+    for i, (bean_y, bean_x) in enumerate(beans_position):
+        # distance = math.sqrt((x - bean_x) ** 2 + (y - bean_y) ** 2)
+        distance_my = mat[bean_y][bean_x]
+        distance_U = matU[bean_y][bean_x]
+        if (len(snakes[id])+1<=len(snakes[id^1])):
+            distance = distance_my
+        else:
+            if (distance_U == math.inf and distance_my == math.inf):
+                distance = math.inf
+            elif (distance_my == math.inf):
+                    distance = math.inf
+            elif (distance_U == math.inf):
+                distance = distance_my *0.6
+            elif (distance_U == distance_my == 1):
+                distance = math.inf
+            else:
+                distance = 0.9*distance_my-0.1*distance_U
+        # snake_id = get_id(y, x, width)
+        # beans_id = get_id(bean_y, bean_x, width)
+        # distance = mat[snake_id][beans_id]
+        if distance < min_distance:
+            min_x = bean_x
+            min_y = bean_y
+            min_distance = distance
+            index = i
+    return min_x, min_y, index
+
 # Self position:        0:head_x; 1:head_y
 # Head surroundings:    2:head_up; 3:head_down; 4:head_left; 5:head_right
 # Beans positions:      (6, 7) (8, 9) (10, 11) (12, 13) (14, 15)
@@ -42,39 +114,49 @@ def get_observations(state, info, agents_index, obs_dim, height, width, step):
     state = np.squeeze(state, axis=2)
     observations = np.zeros((len(agents_index), obs_dim))
     snakes_position = np.array(info['snakes_position'], dtype=object)
-    beans_position = np.array(info['beans_position']).flatten()
-    for i, j in enumerate(agents_index):
+    # beans_position = np.array(info['beans_position']).flatten()
+    beans_position = np.array(info['beans_position'])
+    for i in agents_index:
         # self head position
-        observations[i][:2] = snakes_position[j][0][:]
+        observations[i][:2] = snakes_position[i][0][:]
 
         # head surroundings
         head_x = snakes_position[i][0][1]
         head_y = snakes_position[i][0][0]
         head_surrounding = get_surrounding_3(state, width, height, head_x, head_y)
         observations[i][2:14] = head_surrounding[:]
-        observations[i][14:16] = [head_x, head_y]
-        observations[i][16:18] = [snakes_position[i][1][1],  snakes_position[i][1][0]]
-        observations[i][18:20] = [snakes_position[i][-1][1],  snakes_position[i][-1][0]]
+        # observations[i][14:16] = [head_x, head_y]
+        observations[i][14:16] = [snakes_position[i][1][1],  snakes_position[i][1][0]]
+        observations[i][16:18] = [snakes_position[i][-1][1],  snakes_position[i][-1][0]]
 
         head_x_U = snakes_position[i ^ 1][0][1]
         head_y_U = snakes_position[i ^ 1][0][0]
         head_surrounding = get_surrounding_3(state, width, height, head_x_U, head_y_U)
-        observations[i][20:32] = head_surrounding[:]
-        observations[i][32:34] = [head_x_U, head_y_U]
-        observations[i][34:36] = [snakes_position[i^1][1][1],  snakes_position[i^1][1][0]]
-        observations[i][36:38] = [snakes_position[i^1][-1][1],  snakes_position[i^1][-1][0]]
+        observations[i][18:30] = head_surrounding[:]
+        # observations[i][32:34] = [head_x_U, head_y_U]
+        observations[i][30:32] = [snakes_position[i^1][1][1],  snakes_position[i^1][1][0]]
+        observations[i][32:34] = [snakes_position[i^1][-1][1],  snakes_position[i^1][-1][0]]
         # other snake positions
         snake_heads = [snake[0] for snake in snakes_position]
         snake_heads = np.array(snake_heads[1:])
         snake_heads -= snakes_position[i][0]
-        observations[i][38:40] = snake_heads.flatten()[:]
-        observations[i][40:42] = [len(snake) for snake in snakes_position]
+        observations[i][34:36] = snake_heads.flatten()[:]
+        observations[i][36:38] = [len(snake) for snake in snakes_position]
 
-        observations[i][42] = step
+        observations[i][38] = step
         # beans positions
-        beans_len = len(beans_position)
-        observations[i][43 : 43 + beans_len] = beans_position[:]
-        if (beans_len < 10) : observations[43 + beans_len:] = 0
+        beans = beans_position.flatten()
+        beans_len = len(beans)
+        observations[i][39 : 39 + beans_len] = beans[:]
+        if (beans_len < 10) : observations[i][39 + beans_len:] = 0
+        for j, (beans_y, beans_x) in enumerate(beans_position):
+            dis_my = min(abs(head_y - beans_y), abs(head_y + beans_y + 2 - height)) + min(abs(head_x - beans_x), abs(head_x + beans_x + 2 - width))
+            dis_U = min(abs(head_y_U - beans_y), abs(head_y_U + beans_y + 2 - height)) + min(abs(head_x_U - beans_x), abs(head_x_U + beans_x + 2 - width))
+            observations[i][49 + 2 * j - 2] = dis_my
+            observations[i][49 + 2 * j - 1] = dis_U
+        if (beans_len < 10) : observations[i][49 + beans_len:] = 0
+        observations[i][59:62] = get_min_bean(head_x, head_y, beans_position, width, height, snakes_position, state)
+        observations[i][62:65] = get_min_bean(head_x_U, head_y_U, beans_position, width, height, snakes_position, state)
     return observations
 
 
@@ -172,11 +254,11 @@ def to_joint_action(actions, num_agent):
         joint_action.append(one_hot_action)
     return joint_action
 
-agent = DQN(53, 4, 1, 256)
+agent = DQN(65, 4, 1, 256)
 agent.load('critic_5000.pth')
 
 def my_controller(observation_list, a, b):
-    obs_dim = 53
+    obs_dim = 65
     obs = observation_list[0]
     board_width = obs['board_width']
     board_height = obs['board_height']
