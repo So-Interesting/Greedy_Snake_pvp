@@ -83,9 +83,23 @@ class DQN(object):
         obs_ = torch.tensor(obs_, dtype=torch.float).squeeze()
         done = torch.tensor(done, dtype=torch.float).view(self.batch_size, -1).squeeze()
 
+        '''obs = torch.tensor(obs, dtype=torch.float).squeeze()
+        action = torch.tensor(action, dtype=torch.long).view(self.batch_size, -1)
+        reward = torch.tensor(reward, dtype=torch.float)
+        obs_ = torch.tensor(obs_, dtype=torch.float).squeeze()
+        done = torch.tensor(done, dtype=torch.float)'''
+
         q_eval = self.critic_eval(obs).gather(1, action)
         q_next = self.critic_target(obs_).detach()
         q_target = (reward + self.gamma * q_next.max(1)[0] * (1 - done)).view(self.batch_size, 1)
+        loss_fn = nn.MSELoss()
+        loss = loss_fn(q_eval, q_target)
+        '''q_eval = self.critic_eval(obs).gather(1, action)
+        q_eval_next = self.critic_eval(obs_)
+        max_action = torch.argmax(q_eval_next, dim=1).unsqueeze(1)
+        q_next = self.critic_target(obs_).gather(1, max_action).detach()
+        q_target = (reward + self.gamma * q_next * (1 - done)).view(self.batch_size, 1)'''
+
         loss_fn = nn.MSELoss()
         loss = loss_fn(q_eval, q_target)
 
