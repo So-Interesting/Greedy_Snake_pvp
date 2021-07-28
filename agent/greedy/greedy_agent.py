@@ -227,8 +227,16 @@ def get_map(state, snakes, width, height, turn, dir):
 
 def Cnt_d(state, beans, snakes, width, height, turn, dir):
     mp=get_map(state,snakes,width,height,turn,dir)
+    xx = snakes[turn][0][0]
+    yy = snakes[turn][0][1]
     dx = [-1,1,0,0]
     dy = [0,0,-1,1]
+    xx += dx[dir]
+    yy += dy[dir]
+    xx += height
+    yy += width
+    xx %= height
+    yy %= width
     d=np.zeros((height,width))
     for i in range(height):
         for j in range(width):
@@ -239,7 +247,7 @@ def Cnt_d(state, beans, snakes, width, height, turn, dir):
                 y += width
                 x %= height
                 y %= height
-                if (mp[x][y]==0 or mp[x][y]==1):
+                if (mp[x][y]==0 or mp[x][y]==1 or (xx==x and yy==y)):
                     d[i][j] += 1
     cnt = 0 
     for i in range(height):
@@ -486,9 +494,9 @@ def greedy_snake(state_map, beans, snakes, width, height, ctrl_agent_index, Curr
                     if (xx==head_x_tmp and yy==head_y_tmp):
                         Blok[j] -= 10
                         break
-            if (head_surrounding[j]>1): D[j]=-10000
+            if (head_surrounding[j]>1): D[j]=10000
             else: D[j]= Cnt_d(state_map,beans,snakes,width,height,ctrl_agent_index[0],j)
-            Tup.append((Blok[j],-dis[j],D[j],j))
+            Tup.append((Blok[j],-dis[j],-D[j],j))
         actions.append(Tup.index(max(Tup))) 
     return actions
 
