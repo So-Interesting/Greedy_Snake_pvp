@@ -500,7 +500,6 @@ def greedy_snake(state_map, beans, snakes, width, height, ctrl_agent_index, Curr
         actions.append(Tup.index(max(Tup))) 
     return actions
 
-
 def to_joint_action(actions, num_agent):
     joint_action = []
     for i in range(num_agent):
