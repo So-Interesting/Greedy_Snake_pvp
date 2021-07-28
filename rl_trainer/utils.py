@@ -189,22 +189,23 @@ def get_reward(state, info, snake_index, reward, snake_my_delta, snake_your_delt
         elif final_result == 3:     # done and draw
             step_reward[i] += 20
         else:                       # not done
-            if reward[i] > 0:           # eat a bean
-                step_reward[i] += 30
-            else:                       # just move
-                snakes_position = np.array(info['snakes_position'], dtype=object)
-                beans_position = np.array(info['beans_position'], dtype=object)
-                snakes_len = len(snakes_position)
-                snake_heads = [snake[0] for snake in snakes_position]
-                self_head = np.array(snake_heads[i])
-                #dists = [min(abs(self_head[0] - other_head[0]), abs(self_head[0] + other_head[0] + 2 - height)) + 
-                #        min(abs(self_head[1] - other_head[1]), abs(self_head[1] + other_head[1] + 2 - width))
-                #        for other_head in beans_position]
-                # [np.sqrt(np.sum(np.square(other_head - self_head))) for other_head in beans_position]
-                min_x, min_y, index = get_min_bean(self_head[1], self_head[0], beans_position, width, height, snakes_position, state)
-                step_reward[i] -= (min_x + min_y) * 2
-                step_reward[i] += snake_my_delta * 10
-                if (snake_your_delta < 0): step_reward[i] += snake_your_delta * (-10)
+            #if reward[i] > 0:           # eat a bean
+            #    step_reward[i] += 30
+            # else:                       # just move
+            snakes_position = np.array(info['snakes_position'], dtype=object)
+            beans_position = np.array(info['beans_position'], dtype=object)
+            snakes_len = len(snakes_position)
+            snake_heads = [snake[0] for snake in snakes_position]
+            self_head = np.array(snake_heads[i])
+            #dists = [min(abs(self_head[0] - other_head[0]), abs(self_head[0] + other_head[0] + 2 - height)) + 
+            #        min(abs(self_head[1] - other_head[1]), abs(self_head[1] + other_head[1] + 2 - width))
+            #        for other_head in beans_position]
+            # [np.sqrt(np.sum(np.square(other_head - self_head))) for other_head in beans_position]
+            min_x, min_y, index = get_min_bean(self_head[1], self_head[0], beans_position, width, height, snakes_position, state)
+            step_reward[i] -= (min_x + min_y) * 2
+            if (snake_my_delta > 0) : step_reward[i] += 30
+            else : step_reward[i] += snake_my_delta * 10
+            if (snake_your_delta < 0): step_reward[i] += snake_your_delta * (-10)
                 # step_reward[i] += min(dists)
                 # step_reward[i] += (snake_my_delta - snake_your_delta) * 10
                 # step_reward[i] += snake_your_delta * (-10)
