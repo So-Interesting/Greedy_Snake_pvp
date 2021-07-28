@@ -6,7 +6,7 @@ from utils import *
 from log_path import make_logpath
 from collections import namedtuple
 from dqn import DQN
-from ddqn import DDQN
+# from ddqn import DDQN
 from env.chooseenv import make
 from agent.greedy.greedy_agent import greedy_snake
 from tensorboardX import SummaryWriter
